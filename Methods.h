@@ -19,7 +19,8 @@ using namespace std;
 
 bool cmp(const KmerNode* p1, const KmerNode* p2);
 
-void calTaxoForCtg(const BWTs &bwts, const string& str, map<int,double>& sp_score);
+//void calTaxoForCtg(const BWTs &bwts, const string& str, map<int,double>& sp_score);
+void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_score);
 void compa_read(int ReadLen,const int &position1,const int &position2,int &match,int &mismatch,const ULLN &read1,const ULLN &read2);
 void MergeReads(const KmerNodeAloc& NodePool, const ReadsClass& Reads, USet& uset, int CtgNum);
 void MergeCtgReads(const KmerNodeAloc& NodePool, const ReadsClass& Reads, const ContigsClass& Ctgs, USet& uset);

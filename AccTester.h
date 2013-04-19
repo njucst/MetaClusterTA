@@ -1,7 +1,7 @@
 /* tester for simulated data;
  * by Wang Yi
  * wangyi.tom@gmail.com
- * Nov 14,2012
+ * April 19,2013
  */
 #ifndef MCH_HYBRID_ACCTESTER_H_
 
@@ -79,9 +79,10 @@ public:
 	}
 
 	//pre-condition: the first CtgNum elements in uset are contigs and the rest elements are reads.
-	void calAcc(USet& uset, const int Thresh = 100)
+	void calAcc(USet& uset, const int Thresh = 100,bool isOutputMtx=false)
 	{
 		assert(uset.size()==CtgNum+UnmapedNum);
+		cout << "calAcc: " << isOutputMtx << endl;
 
 		map<int,int> toNewClustId;
 		int idx = 0;
@@ -119,9 +120,12 @@ public:
 			Amax += max;
 
 			if(sum < Thresh)continue;
-			for(int j=0;j<GenomeNum;++j)
-				cout << Comp[i][j] << '\t';
-			cout << max/(double)sum << '\t' << sum << endl;
+			if(isOutputMtx)
+			{
+				for(int j=0;j<GenomeNum;++j)
+					cout << Comp[i][j] << '\t';
+				cout << max/(double)sum << '\t' << sum << endl;
+			}
 		}
 		cout << TCounter << " precision:\t" << Amax/(double)Asum << '\t' << Amax << '\t' << Asum << endl;
 		cerr << TCounter << " precision:\t" << Amax/(double)Asum << '\t' << Amax << '\t' << Asum << endl;
@@ -240,16 +244,19 @@ public:
 				sum += Comp[i][j];
 			Asum += sum;
 
-			int max = 0;
+			int max = 0,maxid=0;
 			for(int j=0;j<GenomeNum;++j)
 				if(Comp[i][j] > max)
+				{
 					max = Comp[i][j];
+					maxid = j;
+				}
 			Amax += max;
 
 //			if(sum < Thresh)continue;
 			for(int j=0;j<GenomeNum;++j)
 				cout << Comp[i][j] << '\t';
-			cout << max/(double)sum << '\t' << sum << endl;
+			cout << max/(double)sum << '\t' << maxid << '\t' << sum << endl;
 		}
 		cerr << "precision:\t" << Amax/(double)Asum << '\t' << Amax << '\t' << Asum << endl;
 		cout << "precision:\t" << Amax/(double)Asum << '\t' << Amax << '\t' << Asum << endl;

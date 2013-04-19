@@ -112,7 +112,6 @@ public:
 	int MergeClusters(double shre_t);
 	int iterMeta(const int ROUND,double shre_t);
 ///////////////////////////////////////////////////////
-	void calAcc(int Thresh = 100);
 	int** getComp()const{return Component;}
 	int getGenoNum()const{return GenoNum;}
 	

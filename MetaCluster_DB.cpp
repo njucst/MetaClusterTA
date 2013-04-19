@@ -203,9 +203,7 @@ void input(int argc, char* argv[])
 	KmerDistriPara Para5mer(5);
 	int** ctgSpear = Ctgs.getSpear(Para5mer);
 	for(int i=0;i<Ctgs.CtgNum;++i)
-	{
 		ctgSpear[i] = NULL;
-	}
 	////////////////////////////////
 	printtime("initializing reads. ");
 	Reads.init(argv[2], ReadLen, AlignThresh, KmerMap, NodePool, Ctgs, acc_tester);
@@ -228,7 +226,6 @@ void input(int argc, char* argv[])
 		///////////////////////////////////////////////////////////////////
 		printtime("initializing acc_tester:\t");
 		acc_tester.init(Reads.TotalNum, Reads.MatchId, Reads.ReadNum,Reads.NewIdToOldId);
-	/*	acc_tester.calAcc(uset);*/
 	}
 	delete[] KmerMap;
 	KmerMap = NULL;
@@ -268,17 +265,17 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	BWTs bwts(argv[3]);
 	NodesDmp.init(argv[4]);
 	if(INTEST)printtime("Before Annotating contigs:");
-#pragma omp parallel for
+	///////////////////////////////////////////////////
+#pragma omp parallel for schedule(dynamic)
 	for(int i=0;i<Ctgs.CtgNum;++i)
 		calTaxoForCtg(bwts, Ctgs.contigs[i]->str, TaxoInfo[i]);
-
-	/////////////////////////////////////////////////////////////////
 	if(INTEST)
 		for(int i=0;i<Ctgs.CtgNum;++i)
 		{
 			cout << " Contig score: " << i << '\t' << Ctgs.contigs[i]->str.length() << '\t';
 			for(map<int,double>::const_iterator itr=TaxoInfo[i].begin();itr!=TaxoInfo[i].end();++itr)
-				cout << itr->first << ':' << itr->second << '\t';
+				if(itr->second >= 0.4*(Ctgs.contigs[i]->str.length()))
+					cout << itr->first << ':' << itr->second << '\t';
 			cout << endl;
 		}
 	//calculate scores

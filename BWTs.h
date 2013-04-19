@@ -1,6 +1,7 @@
 /*
- * last fixed: 2013.01.21.
+ * last fixed: 2013.04.17.
  * by Wang Yi.
+ * add fid for testing.
  * */
 #ifndef MCH_HYBRID_BWTS_H_
 
@@ -20,6 +21,11 @@ public:
 
 	explicit BWTs(string filepath);
 	virtual ~BWTs(){}
+	/////////////////////////////////////////////
+	const static int ForbidNum = 100;
+	static int Forbid[ForbidNum];
+	vector<short*>fids;
+	/////////////////////////////////////////////
 private:
 	vector<BWTDtStr> bwts;
 	BWTs(){}
