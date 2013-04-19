@@ -40,7 +40,7 @@ void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_scor
 	{
 		set<int> cand_taxid;
 	   	bwts.search(*itr, cand_taxid);
-		if(cand_taxid.size()==0)return;
+		if(cand_taxid.size()==0)continue;
 		double unit = 1.0/cand_taxid.size();
 		for(set<int>::const_iterator itr2 = cand_taxid.begin();itr2!=cand_taxid.end();++itr2)
 			sp_score[*itr2] += unit;
