@@ -332,13 +332,21 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 			for(map<int,map<int,double> >::const_iterator itr2= Node_Score.begin();itr2!=Node_Score.end();++itr2)
 			{
 				int maxTaxoid = 0;double maxScore = 0;
+				int maxTaxoid2 = 0;double maxScore2 = 0;
 				double TotalScore = 0;
 				for(map<int,double>::const_iterator itr3 = itr2->second.begin();itr3!=itr2->second.end();++itr3)
 				{
-					if(itr3->second > maxScore && itr3->first > 0)
+					if(itr3->second >= maxScore && itr3->first > 0)
 					{
 						maxScore = itr3->second;
 						maxTaxoid = itr3->first;
+						maxScore2 = maxScore2;
+						maxTaxoid2 = maxTaxoid2;
+					}
+					else if(itr3->second > maxScore2 && itr3->first > 0)
+					{
+						maxScore2 = itr3->second;
+						maxTaxoid2 = itr3->first;
 					}
 					if(itr3->first > 0)TotalScore += itr3->second;
 				}
@@ -346,7 +354,9 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 				TaxoOfClust[cidx].alignscore[itr2->first]=maxScore;
 
 				cout << "cluster temp score: " << cidx <<'\t';
-				cout <<  maxTaxoid << '\t' << maxScore << '\t' << TotalScore << '\t' << ClustLength[cidx] <<'\t';
+				cout <<  maxTaxoid << '\t' << maxScore << '\t'
+					<<  maxTaxoid2 << '\t' << maxScore2 << '\t'
+				   	<< TotalScore << '\t' << ClustLength[cidx] <<'\t';
 				cout << NodesDmp.Id2LevelName[itr2->first] << endl;
 			}
 		}

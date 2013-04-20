@@ -21,11 +21,6 @@ public:
 
 	explicit BWTs(string filepath);
 	virtual ~BWTs(){}
-	/////////////////////////////////////////////
-	const static int ForbidNum = 100;
-	static int Forbid[ForbidNum];
-	vector<short*>fids;
-	/////////////////////////////////////////////
 private:
 	vector<BWTDtStr> bwts;
 	BWTs(){}

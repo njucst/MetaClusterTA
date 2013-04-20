@@ -38,11 +38,17 @@ void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_scor
 	}
 	for(set<string>::const_iterator itr = kmers.begin();itr!=kmers.end();++itr)
 	{
-		set<int> cand_taxid;
-	   	bwts.search(*itr, cand_taxid);
+		set<int> gross_cand_taxid;
+	   	bwts.search(*itr, gross_cand_taxid);
+		//////////////////////////////////////////////
+		vector<int>cand_taxid;
+		for(set<int>::const_iterator itr2 = gross_cand_taxid.begin();itr2!=gross_cand_taxid.end();++itr2)
+			if(ForbidTaxid.find(*itr2)==ForbidTaxid.end())
+				cand_taxid.push_back(*itr2);
+		//////////////////////////////////////////////
 		if(cand_taxid.size()==0)continue;
 		double unit = 1.0/cand_taxid.size();
-		for(set<int>::const_iterator itr2 = cand_taxid.begin();itr2!=cand_taxid.end();++itr2)
+		for(vector<int>::const_iterator itr2 = cand_taxid.begin();itr2!=cand_taxid.end();++itr2)
 			sp_score[*itr2] += unit;
 	}
 }
