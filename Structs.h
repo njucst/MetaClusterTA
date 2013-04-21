@@ -88,6 +88,11 @@ public:
 	KmerNode* next;
 	KmerType kmer;
 	NodeIDPosi* myvector;
+	~KmerNode()
+	{
+		if(myvector)
+			delete[] myvector;
+	}
 	void push_back(unsigned ele,unsigned posi)
 	{
 		assert(Capacity>0);

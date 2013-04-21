@@ -280,13 +280,18 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	///////////////////////////////////////////////////////////////////////
 	TaxoInfo.resize(Ctgs.CtgNum);
 	if(INTEST)printtime("Before initiating contigs. ");
+	system("ps ux");
 	BWTs bwts(argv[3]);
 	NodesDmp.init(argv[4]);
 	if(INTEST)printtime("Before Annotating contigs:");
+	system("ps ux");
 	///////////////////////////////////////////////////
 #pragma omp parallel for schedule(dynamic)
 	for(int i=0;i<Ctgs.CtgNum;++i)
 		calTaxoForCtg(bwts, Ctgs.contigs[i]->str, TaxoInfo[i]);
+	system("ps ux");
+	bwts.clear();
+	system("ps ux");
 	if(INTEST)
 		for(int i=0;i<Ctgs.CtgNum;++i)
 		{
@@ -379,16 +384,20 @@ int main(int argc, char* argv[])
 		usage();
 	init();
 	input(argc,argv);
+	system("ps ux");
 
 	printtime("Main: before MergeAsStep1. ");
 	MergeAsStep1(Ctgs,Reads,NodePool,uset,acc_tester,AlignThresh);
-
 	if(INTEST)acc_tester.calAcc(uset);
 
 	printtime("Main: before MetaCluster. ");
 	MCPara mcpara(MetaKmerLen, Ctgs, uset, acc_tester);
+	system("ps ux");
 	MetaCluster metacluster(mcpara.KmerLen, mcpara.Size, mcpara.ReverKmerDistri, ClusterSize, MaxSpecies, MinSpecies, mcpara.GenoNum , mcpara.Component);
+	system("ps ux");
 	ClusterSize ? (metacluster.muiltkmeans(10,ClusterSize)) : (metacluster.iterMeta(10,MC3_Thresh));
+	metacluster.clear();//best[]&Component[][] are not cleared.
+	system("ps ux");
 	printtime("Main: before anaCluster. ");
 	anaCluster(mcpara, metacluster, Reads.ReadNumInCtg,argv);
 	/* ToDo: clear memory

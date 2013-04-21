@@ -1,45 +1,45 @@
-MetaCluster_DB:  MetaCluster_DB.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o 
-	g++ -fopenmp MetaCluster_DB.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o -o MetaCluster_DB
+MetaClusterTA:  MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o 
+	g++ -O2 -fopenmp MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o -o MetaClusterTA
 
 Methods.o: Methods.h Methods.cpp
-	g++ -fopenmp Methods.h Methods.cpp -c
+	g++ -O2 -fopenmp Methods.h Methods.cpp -c
 
 MetaCluster.o: MetaCluster.cpp MetaCluster.h
-	g++ -fopenmp MetaCluster.cpp MetaCluster.h -c
+	g++ -O2 -fopenmp MetaCluster.cpp MetaCluster.h -c
 
 Reader.o: Reader.h Reader.cpp
-	g++ -fopenmp Reader.h Reader.cpp -c
+	g++ -O2 -fopenmp Reader.h Reader.cpp -c
 
 TomAlgorithm.o: TomAlgorithm.cpp TomAlgorithm.h
-	g++ -fopenmp TomAlgorithm.cpp  TomAlgorithm.h -c
+	g++ -O2 -fopenmp TomAlgorithm.cpp  TomAlgorithm.h -c
 
 ShortKMER.o: ShortKMER.h ShortKMER.cpp
-	g++ -fopenmp ShortKMER.h ShortKMER.cpp -c
+	g++ -O2 -fopenmp ShortKMER.h ShortKMER.cpp -c
 
 KMER.o: KMER.h KMER.cpp
-	g++ -fopenmp KMER.h KMER.cpp -c
+	g++ -O2 -fopenmp KMER.h KMER.cpp -c
 
 BaseStr.o: BaseStr.h BaseStr.cpp
-	g++ -fopenmp BaseStr.h BaseStr.cpp -c
+	g++ -O2 -fopenmp BaseStr.h BaseStr.cpp -c
 
 USet.o: USet.cpp USet.h
-	g++ -fopenmp USet.cpp USet.h -c
+	g++ -O2 -fopenmp USet.cpp USet.h -c
 
 ULLN.o: ULLN.h ULLN.cpp
-	g++ -fopenmp ULLN.h ULLN.cpp -c
+	g++ -O2 -fopenmp ULLN.h ULLN.cpp -c
 	
 Utils.o: Utils.cpp Utils.h
-	g++ -fopenmp Utils.cpp Utils.h -c
+	g++ -O2 -fopenmp Utils.cpp Utils.h -c
 
 BWTs.o: BWTs.cpp BWTs.h
-	g++ -fopenmp BWTs.cpp BWTs.h -c
+	g++ -O2 -fopenmp BWTs.cpp BWTs.h -c
 
 BWTDtStr.o: BWTDtStr.cpp BWTDtStr.h
-	g++ -fopenmp BWTDtStr.cpp BWTDtStr.h -c
+	g++ -O2 -fopenmp BWTDtStr.cpp BWTDtStr.h -c
 
 GLOBAL.o: GLOBAL.cpp GLOBAL.h
-	g++ GLOBAL.cpp GLOBAL.h -c
+	g++ -O2 GLOBAL.cpp GLOBAL.h -c
 
 clean:
-	rm -rf *.o *.gch MetaCluster_DB
+	rm -rf *.o *.gch MetaClusterTA
 

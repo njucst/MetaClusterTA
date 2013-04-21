@@ -74,3 +74,14 @@ void BWTs::search(const string& str,set<int>& ans)const
 				ans.insert(itr->Taxid_of_SA[i]);
 	}
 }
+void BWTs::clear()
+{
+	for(vector<BWTDtStr>::iterator itr=bwts.begin();itr!=bwts.end();++itr)
+		itr->clear();
+	bwts.clear();
+}
+BWTs::~BWTs()
+{
+	for(vector<BWTDtStr>::iterator itr=bwts.begin();itr!=bwts.end();++itr)
+		itr->clear();
+}

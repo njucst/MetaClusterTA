@@ -107,6 +107,26 @@ public:
 		}
 	}
 	virtual ~MetaCluster(){}
+	void clear()
+	{
+//		delete[] best;
+		delete[] CtgLen;CtgLen = NULL;
+		delete[]distSum;distSum=NULL;
+		delete[]distNum;distNum=NULL;
+		delete[]distSumSquare;distSumSquare=NULL;
+		delete[]distMean;distMean=NULL;
+		delete[]distSD;distSD=NULL;
+		delete[]isOutlier;isOutlier=NULL;
+		delete[]type;type=NULL;
+		delete[]aux;aux=NULL;
+		delete[]SpearRank;SpearRank=NULL;
+		for(int i=0;i<classes;++i)
+			delete[]centerDistri[i];
+		delete[]centerDistri;centerDistri=NULL;
+		for(int i=0;i<classes;++i)
+			delete[]centerRank[i];
+		delete[]centerRank;centerRank=NULL;
+	}
 ////////////////////////////////////////////////////////
 	double muiltkmeans(const int ROUND,int classes_);
 	int MergeClusters(double shre_t);

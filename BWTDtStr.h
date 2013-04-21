@@ -22,6 +22,7 @@ public:
 	int* Taxid_of_SA;
 
 	void preprocess(char* bwt_in_DESIGN_format, int* Taxid_of_SA_);
+	void clear();
 	BWTDtStr();
 	virtual ~BWTDtStr();
 private:

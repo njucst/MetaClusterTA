@@ -32,6 +32,11 @@ public:
 		contigs = NULL;
 		CtgNum = 0;
 	}
+	~ContigsClass()
+	{
+		delete[]contigs;
+		delete[]info;
+	}
 	ContigsClass(string path, int Thresh, KmerNode** KmerMap,KmerNodeAloc& AllNodes)
 	{
 		init(path,Thresh, KmerMap,AllNodes);

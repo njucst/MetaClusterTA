@@ -29,11 +29,11 @@ void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_scor
 				default:rstr[i]='N';
 			}
 		}
-		int strend = (str.length()-(PARA_KMER-1));
+		int strend = (str.length()-(PARA_ANNOTATION_KMER-1));
 		for(int i=0;i<strend;++i)
 		{
-			kmers.insert( str.substr(i,PARA_KMER));
-			kmers.insert(rstr.substr(i,PARA_KMER));
+			kmers.insert( str.substr(i,PARA_ANNOTATION_KMER));
+			kmers.insert(rstr.substr(i,PARA_ANNOTATION_KMER));
 		}
 	}
 	for(set<string>::const_iterator itr = kmers.begin();itr!=kmers.end();++itr)

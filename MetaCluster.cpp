@@ -310,7 +310,6 @@ int MetaCluster::MergeClusters(double cret_shre)
 	int** lastcomp = NULL;
 	if(GenoNum > 0)
 	{
-
 		lastcomp = new int*[classes];
 		for(int i=0;i<classes;++i)
 		{
@@ -451,6 +450,15 @@ int MetaCluster::MergeClusters(double cret_shre)
 	}
 
 	/////////////////////////////////////////////
+	delete[] clusize;
+	delete[] cluSTsize;
+	delete[] intradistance;
+	if(GenoNum > 0)
+	{
+		for(int i=0;i<classes;++i)
+			delete[] lastcomp[i];
+		delete[]lastcomp;
+	}
 	/*
 	set<int> testbest;
 	for (int i = 0; i < Size; ++i)

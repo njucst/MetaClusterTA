@@ -164,7 +164,8 @@ pair<long long, long long> BWTDtStr::search(const vector<int>& query)const
 }
 BWTDtStr::~BWTDtStr()
 {
-/*	for(int i=0;i<4;++i)
+/*	delete[] Taxid_of_SA;
+	for(int i=0;i<4;++i)
 	{
 		if(bits[i])
 			delete[] bits[i];
@@ -173,4 +174,23 @@ BWTDtStr::~BWTDtStr()
 		if(AppearL2[i])
 			delete[] AppearL2[i];
 	}*/
+}
+void BWTDtStr::clear()
+{
+	if(Taxid_of_SA)
+		delete[] Taxid_of_SA;
+	Taxid_of_SA = NULL;
+	for(int i=0;i<4;++i)
+	{
+		if(bits[i])
+			delete[] bits[i];
+		if(AppearL1[i])
+			delete[] AppearL1[i];
+		if(AppearL2[i])
+			delete[] AppearL2[i];
+
+		bits[i] = NULL;
+		AppearL1[i] = NULL;
+		AppearL2[i] = NULL;
+	}
 }

@@ -20,7 +20,8 @@ public:
 	void search(const string& str,set<int>& ans)const;
 
 	explicit BWTs(string filepath);
-	virtual ~BWTs(){}
+	void clear();
+	virtual ~BWTs();
 private:
 	vector<BWTDtStr> bwts;
 	BWTs(){}
