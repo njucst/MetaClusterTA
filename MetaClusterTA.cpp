@@ -99,6 +99,8 @@ void init()
 	///////////////////////////////////////////////////////
 	const static int ForbidNum = 100;
 	int Forbid[] = {1573,1398,1997,75,1490,1666,585,659,37,1995,1121,1862,863,873,683,693,1615,582,1352,2056,1332,2012,1364,22,1504,773,232,193,1404,781,1466,753,962,2037,1652,2002,851,266,201,1672,280,1158,311,1494,1284,823,642,884,347,1731,838,1078,1520,1958,946,1468,665,1688,1689,1382,1945,12,1475,631,620,964,1101,1899,342,128,1091,1326,1748,24,932,1090,854,79,879,1474,1125,1142,531,858,1679,1669,2023,1274,26,1698,206,968,1623,1627,412,56,411,1874,1339,926};
+/*	const static int ForbidNum = 2;
+	int Forbid[] = {716,753};*/
 	ifstream ifs("/home/ywang/DB/list/No_Taxid.list");
 	assert(!ifs.fail());
 	const int MAXFile = 5000;
@@ -156,6 +158,7 @@ void input(int argc, char* argv[])
 	cerr << "MC3_Thresh:\t" << MC3_Thresh << endl;
 	/////////////////////////////////////////////////////////////////
 	if(INTEST)printtime("before loading contigs. ");
+	system("ps ux");
 	Ctgs.init(argv[1], CtgLenThresh,KmerMap, NodePool);
 	if(INTEST)
 	{
@@ -218,12 +221,13 @@ void input(int argc, char* argv[])
 		}
 	}*/
 	/////////////////////////////////////////////////////////////////
-	KmerDistriPara Para5mer(5);
+/*	KmerDistriPara Para5mer(5);
 	int** ctgSpear = Ctgs.getSpear(Para5mer);
 	for(int i=0;i<Ctgs.CtgNum;++i)
-		ctgSpear[i] = NULL;
+		ctgSpear[i] = NULL;*/
 	////////////////////////////////
 	printtime("initializing reads. ");
+	system("ps ux");
 	Reads.init(argv[2], ReadLen, AlignThresh, KmerMap, NodePool, Ctgs, acc_tester);
 	{
 		printtime("initializing uset: ");
@@ -245,8 +249,11 @@ void input(int argc, char* argv[])
 		printtime("initializing acc_tester:\t");
 		acc_tester.init(Reads.TotalNum, Reads.MatchId, Reads.ReadNum,Reads.NewIdToOldId);
 	}
+/*	for(unsigned i=0;i<HASHSIZE;++i)
+		delete KmerMap[i];*/
 	delete[] KmerMap;
 	KmerMap = NULL;
+	system("ps ux");
 //	NodePool.shrinkSize(NULL,2);
 	//////////////////////////////////////////////////////////
 }
@@ -388,6 +395,7 @@ int main(int argc, char* argv[])
 
 	printtime("Main: before MergeAsStep1. ");
 	MergeAsStep1(Ctgs,Reads,NodePool,uset,acc_tester,AlignThresh);
+	NodePool.clear();
 	if(INTEST)acc_tester.calAcc(uset);
 
 	printtime("Main: before MetaCluster. ");

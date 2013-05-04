@@ -199,7 +199,6 @@ public:
 		{
 			if(AllNodes[i] != NULL)
 				delete[] AllNodes[i];
-			AllNodes[i] = NULL;
 		}
 		delete[] AllNodes;
 		NodeNum = 0;

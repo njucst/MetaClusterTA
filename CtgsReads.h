@@ -41,7 +41,7 @@ public:
 	{
 		init(path,Thresh, KmerMap,AllNodes);
 	}
-	int** getSpear(const KmerDistriPara& K5mer)
+/*	int** getSpear(const KmerDistriPara& K5mer)
 	{
 		int** ans = new int*[CtgNum];
 		////////////////////////////////get k-mer distribution
@@ -51,7 +51,7 @@ public:
 			getRever((contigs[i]->str).c_str(),ans[i],K5mer);
 		}
 		return ans;
-	}
+	}*/
 	void insertHash(KmerNodeAloc& AllNodes, KmerNode** KmerMap, const KMER& kmer_, const unsigned hashidx, int id, int posi)
 	{
 		unsigned idx = hashidx;
