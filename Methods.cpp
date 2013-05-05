@@ -302,7 +302,7 @@ void MergePE(const ReadsClass& Reads, USet& uset, AccTester& acc_tester)
 	for(int i=0;i<SPMTXSIZE;++i)
 		omp_init_lock(&hash_lock[i]);
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 	for(int i=0;i<Reads.TotalNum;i+=2)
 	{
 		int idx1 = Reads.MatchId[i];

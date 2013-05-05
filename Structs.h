@@ -1,12 +1,16 @@
 /*
  * last fixed: 2012.11.10.
  * by Wang Yi.
- * */
+ * Note: clear() cannot return the memory to OS. Bcasue we have too many small arrays(i.e. myvector) < 80byte. glibc does not return them to OS immediately even we use free/delete;
+ * ToDo: clear memory
+ * because outputResult needs O(n)memory, where n is # reads.
+ */
 #ifndef MCH_HYBRID_STRUCTS_H_
 
 #define MCH_HYBRID_STRUCTS_H_
 
 #include <cmath>
+#include <map>
 #include <cassert>
 #include <vector>
 #include <iostream>
@@ -191,10 +195,22 @@ public:
 	}
 	void clear()
 	{
+/*		cout <<"capacity & vsize:"<<endl;
+		map<int,int>Cap;
 		for(unsigned i=0;i<NodeNum;++i)
-		{
+			++Cap[AllNodes[i>>RowSizeBit][i&MASK].Capacity];
+		for(map<int,int>::const_iterator itr=Cap.begin();itr!=Cap.end();++itr)
+			cout << (itr->first) <<'\t'<<(itr->second)<<endl;
+		Cap.clear();
+		for(unsigned i=0;i<NodeNum;++i)
+			++Cap[AllNodes[i>>RowSizeBit][i&MASK].VSize];
+		for(map<int,int>::const_iterator itr=Cap.begin();itr!=Cap.end();++itr)
+			cout << (itr->first) <<'\t'<<(itr->second)<<endl;
+			*/
+
+		if(NULL==AllNodes)return;
+		for(unsigned i=0;i<NodeNum;++i)
 			AllNodes[i>>RowSizeBit][i&MASK].clear();
-		}
 		for(unsigned i=0;i<RowNum;++i)
 		{
 			if(AllNodes[i] != NULL)
@@ -218,6 +234,8 @@ public:
 	}*/
 	virtual ~KmerNodeAloc()
 	{
+		omp_destroy_lock(&getnew_lock);
+		if(NULL==AllNodes)return;
 		for(int i=0;i<NodeNum;++i)
 			AllNodes[i>>RowSizeBit][i&MASK].clear();
 		for(unsigned i=0;i<RowNum;++i)
@@ -225,7 +243,6 @@ public:
 				delete[] AllNodes[i];
 		delete[]AllNodes;
 		AllNodes = NULL;
-		omp_destroy_lock(&getnew_lock);
 	}
 
 	KmerNode* getNew(KmerType kmer_,unsigned id_,unsigned posi_)
@@ -351,7 +368,6 @@ private:
 	}
 	void clearVect(unsigned id)
 	{
-//		delete[] AllNodes[id>>RowSizeBit][id&MASK].myvector;
 		AllNodes[id>>RowSizeBit][id&MASK].clear();
 	}
 

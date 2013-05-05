@@ -116,7 +116,7 @@ public:
 		omp_lock_t* hash_lock = new omp_lock_t[1U<<20];
 		for(int i=0;i<(1U<<20);++i)
 		omp_init_lock(&hash_lock[i]);
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 		for(int i=0;i<idx;++i)
 			mapto(hash_lock, ctgstr[i], i, AllNodes, KmerMap);
 		for(int i=0;i<(1U<<20);++i)
@@ -341,7 +341,7 @@ public:
 		omp_lock_t* hash_lock = new omp_lock_t[1U<<20];
 		for(int i=0;i<(1U<<20);++i)
 		omp_init_lock(&hash_lock[i]);
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 		for(int i=0;i<ReadNum;++i)
 			mapto(hash_lock, readstrs[i], i, AllNodes, KmerMap);
 		for(int i=0;i<(1U<<20);++i)

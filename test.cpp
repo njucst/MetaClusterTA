@@ -1,63 +1,31 @@
 #include <iostream>
-#include "BWTGenerator.h"
+#include <cassert>
+#include <fstream>
 #include <cstdio>
 #include <cstring>
 #include <string>
 #include <dirent.h>
 #include <cstdlib>
 using namespace std;
-void List(const char *path, int level)
-{
-	struct dirent *ent = NULL;
-	DIR *pDir;
-	if((pDir = opendir(path)) != NULL)
-	{
-		while(NULL != (ent = readdir(pDir)))
-		{
-			if(ent->d_type == 8)					// d_type:8-??,4-??
-			{
-				for(int i = 0; i < level; i++)
-					printf("--");
-				printf("%s/%s\n", path,ent->d_name);
-			}
-			else if(ent->d_name[0] != '.')
-			{
-				for(int i = 0; i < level; i++)
-					printf("+ ");
-				char *p = new char[strlen(path) + strlen(ent->d_name) + 2];
-				strcpy(p, path);
-				strcat(p, "/");
-				strcat(p, ent->d_name);
-				printf("%s/%s\n", path,ent->d_name);
-				List(p, level+1);					// ???????
-				free(p);
-			}
-		}
-		closedir(pDir);
-	}
-}
+struct Node{
+	int id,posi;
+};
 int main()
 {
-//	cout << sizeof(unsigned short) << endl;
-//	List("/home/ywang/Hybrid",1); 
-//	char str[] = "ACACGT";
-	char str[] = "ATGGTTCCGATGCCATTGCCGGAGTCGTCAATATCATTTTGAAATCTGACAATCATGGTGGCAGTGCCAGAAGTCAGATCGGACAGACCTATGCCGGAGATGGATTGGTCGGACAGGCCGGTTTTAATAAGGGATTCAAAATTGGCCATTCCGGTTTCTTTGATGTCGCCTTCGATTTTCGTCATCAAAATCATACCAGCCGTGATGGTATCGATAGCCGAACCCAGCGCCATAGTTTGAAAGTTGTCGGTGATCCGATGGCGACCCGCTATAATCTAGCGATCAATGCCGGTTATGATTTTGGAAATGGCATCGAAATTTATACGACTGATAGCTATTCGCATCGCAATMATAATATAACATTATTTAATAATTTATATCCAATAAATAAATACTTTATACCCATAAATTATATTTAAATTTTATAATTAAATAAAATAATTATNNNAAAAATTATCGAGGAGAAGCCAAATTATCTAAAAATAAAGAGGGGGCGTATGAAAAATTTTATTAAAAANNNNNNNTTTCTTTTTTCCTTTTCATGGTTTTTCTTGCAATATCGATCTTGATTTGATTGCACCTGAATTGATTGACCATAMATCAGAGCTTTATCAGGATGAAGCCTTTGTCCAGCATCAATAAACGGCAATTTCTTTCGCTTTCTGCTCTGACCGCTTTTTTACCAATGGCAACCCAAGTCTTGGGTAAAAATTCCGGTAAAGAGGCCTCGAAGAATTTGGMACGCACAAGGGGTGACCGTAGCTTCGACGCTTGAGGCTCAAAATATATCGGCATGGTTCTTTACCAATGGTGCCAGCACCCGCACCCGCGGTTTGGATTTTACM";
-	BWTGenerator sfa;
+	const int N=250000000;
+	Node ** V=new Node*[N];
+/*	for(int i=0;i<N;++i)
+		V[i] = (Node*)malloc(2*sizeof(Node));
+	system("ps ux");
+	for(int i=0;i<N;++i)
+		free(V[i]);
+	system("ps ux");
+	delete[]V;
+	system("ps ux");*/
 
-/*	unsigned str2[10000];
-	for(int i=0;i<sizeof(str);++i)
-		str2[i] = str[i];
-	unsigned SA[10000];
-	sfa.dc3(str2,SA,sizeof(str),'Z');*/
-
-
-	sfa.calBWT(str);//result);
-	char* result = sfa.getBWT();
-	cout << result << endl;
-	unsigned *SA = sfa.getSA();
-
-	for(int i=0;i<=strlen(str);++i)
-		cout <<SA[i] << '_';
-	cout << endl;
+	Node p[1000][2];
+	for(int i=0;i<1000;++i)
+		V[i] = p[i];
+	cerr << sizeof(p) << '\t' << sizeof(V)<<endl;
 	return 0;
 }

@@ -68,13 +68,13 @@ BaseStr::BaseStr(const string& str_,bool isRev)
 	{
 		for(int i=length-1;i>=0;--i)
 		{
-			unsigned b = 0;
+			unsigned b = 3;
 			if(str_[i]=='C' || str_[i]=='c')
-				b = 1;
-			else if(str_[i]=='G' || str_[i]=='g')
 				b = 2;
+			else if(str_[i]=='G' || str_[i]=='g')
+				b = 1;
 			else if(str_[i]=='T' || str_[i]=='t')
-				b = 3;
+				b = 0;
 			U64[(length-1-i)>>5] <<= 2; 
 			U64[(length-1-i)>>5] |= b;
 		}

@@ -67,7 +67,7 @@ AccTester acc_tester;
 ////////////////////////////////////////////////////////////////////////////
 void usage()
 {
-	cerr << "usage:\t MetaCluster_HB contig.fa read.fa bwt.idx nodes.dmp [options]" << endl;
+	cerr << "usage:\t MetaClusterTA contig.fa read.fa bwt.idx nodes.dmp [options]" << endl;
 	cerr << endl;
 	exit(-1);
 }
@@ -82,7 +82,6 @@ void printtime(string str = "")
 
 void init()
 {
-	///////////////////////////////////////////////////////
 	{
 		unsigned long long u64Exp = ((((1ULL << 50)%HASHSIZE)<<14))%HASHSIZE;
 		unsigned long long tExp = 1;
@@ -157,80 +156,23 @@ void input(int argc, char* argv[])
 	cerr << "AlignThresh:\t " << AlignThresh << endl;
 	cerr << "MC3_Thresh:\t" << MC3_Thresh << endl;
 	/////////////////////////////////////////////////////////////////
-	if(INTEST)printtime("before loading contigs. ");
-	system("ps ux");
+	if(INTEST){
+		printtime("before loading contigs. ");
+		system("ps ux");
+	}
 	Ctgs.init(argv[1], CtgLenThresh,KmerMap, NodePool);
-	if(INTEST)
-	{
-		cerr << "# of Contigs: \t" << Ctgs.CtgNum << endl;
-		/*
-		map<int,int>MId;
-		map<int,int>MOc;
-		omp_lock_t tlock;
-		omp_init_lock(&tlock);
-#pragma omp parallel for
-		for(unsigned i=0;i<HASHSIZE;++i)
-		{
-			for(KmerNode* p = KmerMap[i];p!=NULL;p=p->next)
-			{
-				set<int>ids;
-				for(int j=0;j<p->VSize;++j)
-					ids.insert(p->myvector[j].id);
-				omp_set_lock(&tlock);
-				++MId[ids.size()];
-				++MOc[p->VSize];
-				omp_unset_lock(&tlock);
-			}
-		}
-		cout << "Id Occurence: " << endl;
-		for(map<int,int>::const_iterator itr=MId.begin();itr!=MId.end();++itr)
-			cout << itr->first << '\t' << itr->second << endl;
-		cout << "Kmer Occurence: " << endl;
-		for(map<int,int>::const_iterator itr=MOc.begin();itr!=MOc.end();++itr)
-			cout << itr->first << '\t' << itr->second << endl;
-		*/
+	if(INTEST){
+		cerr << "# of Contigs: " << Ctgs.CtgNum << "\tNodeNum:" << NodePool.getNodeNum()<< endl;
 		printtime("Contigs loaded. ");
-		///////////////////////////////////////////////////////////
 	}
 	NodePool.fixCtgNum();
-	if(INTEST)cerr<<"Ctg Num fixed." << endl;
-	////////////////////////////////
-//	GenoDB.init(argv[3], KmerMap, NodePool);
-/*	GenoDB.init(argv[3]);
-	system("ps ux");
-	if(INTEST)cerr<<"Genome DB loaded: "<< Ctgs.CtgNum << endl;
-	*/
-/*	TaxoInfo.resize(Ctgs.CtgNum);
-	if(INTEST)cerr<<"Before Annotating contigs:" << endl;
-#pragma omp parallel for
-	for(int i=0;i<Ctgs.CtgNum;++i)
-	{
-		unsigned taxid=UNASSIGNED;double score;
-		unsigned simulateId;double simulateScore;
-		vector<double>entropy;
-		GenoDB.calTaxoForCtg(Ctgs.contigs[i]->str, taxid, score,entropy,simulateId,simulateScore);
-		if(score < 0)taxid = UNASSIGNED;
-		TaxoInfo[i].set(taxid,score);
-		if(score>=0)
-		{
-			cout << i << '\t' << taxid << '\t' << score <<'\t'<<simulateScore << '\t' << GenoDB.GenomeLength[taxid] << '\t';
-			cout << GenoDB.GenomeLength[simulateId] << '\t';
-			for(int j=0;j<7;++j)cout << GenoDB.Taxo[taxid][j] << '\t';
-			for(int j=0;j<7;++j)cout << entropy[j] << '\t';
-			cout << Ctgs.contigs[i]->length <<'\t'<< Ctgs.info[i] << endl;
-		}
-	}*/
-	/////////////////////////////////////////////////////////////////
-/*	KmerDistriPara Para5mer(5);
-	int** ctgSpear = Ctgs.getSpear(Para5mer);
-	for(int i=0;i<Ctgs.CtgNum;++i)
-		ctgSpear[i] = NULL;*/
-	////////////////////////////////
-	printtime("initializing reads. ");
-	system("ps ux");
 	Reads.init(argv[2], ReadLen, AlignThresh, KmerMap, NodePool, Ctgs, acc_tester);
-	{
+	if(INTEST){
+		cerr << "NodeNum:" << NodePool.getNodeNum()<< endl;
 		printtime("initializing uset: ");
+		system("ps ux");
+	}
+	{
 		int CtgNum = Ctgs.CtgNum;
 		unsigned* ctglen = new unsigned[CtgNum];
 		for(int i=0;i<CtgNum;++i)
@@ -238,24 +180,18 @@ void input(int argc, char* argv[])
 		uset.init(Ctgs.CtgNum + Reads.ReadNum, CtgNum, ctglen);
 		delete[]ctglen;
 	}
-
-	if(INTEST)
-	{
-		printtime("Reads loaded. ");
+	delete[] KmerMap;
+	KmerMap = NULL;
+	///////////////////////////////////////////////////////////
+	if(INTEST){
 		cerr << dec << "Total Reads:\t"<< Reads.TotalNum << endl;
 		cerr << "Unmaped Reads:\t" << Reads.ReadNum << endl;
 		cerr << "AlignThresh:\t" << Reads.AlignThresh << endl;
-		///////////////////////////////////////////////////////////////////
 		printtime("initializing acc_tester:\t");
+		system("ps ux");
 		acc_tester.init(Reads.TotalNum, Reads.MatchId, Reads.ReadNum,Reads.NewIdToOldId);
 	}
-/*	for(unsigned i=0;i<HASHSIZE;++i)
-		delete KmerMap[i];*/
-	delete[] KmerMap;
-	KmerMap = NULL;
-	system("ps ux");
 //	NodePool.shrinkSize(NULL,2);
-	//////////////////////////////////////////////////////////
 }
 
 void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadNumInCtg,char* argv[])
@@ -284,22 +220,25 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 		ClustLength[i] = len;
 	}
 	///////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////
 	TaxoInfo.resize(Ctgs.CtgNum);
-	if(INTEST)printtime("Before initiating contigs. ");
-	system("ps ux");
+	if(INTEST){
+		printtime("Before initiating contigs. ");
+		system("ps ux");
+	}
 	BWTs bwts(argv[3]);
 	NodesDmp.init(argv[4]);
-	if(INTEST)printtime("Before Annotating contigs:");
-	system("ps ux");
+	if(INTEST){
+		printtime("Before Annotating contigs:");
+		system("ps ux");
+	}
 	///////////////////////////////////////////////////
 #pragma omp parallel for schedule(dynamic)
 	for(int i=0;i<Ctgs.CtgNum;++i)
 		calTaxoForCtg(bwts, Ctgs.contigs[i]->str, TaxoInfo[i]);
 	system("ps ux");
 	bwts.clear();
-	system("ps ux");
-	if(INTEST)
+	if(INTEST){
+		system("ps ux");
 		for(int i=0;i<Ctgs.CtgNum;++i)
 		{
 			cout << " Contig score: " << i << '\t' << Ctgs.contigs[i]->str.length() << '\t';
@@ -308,6 +247,7 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 					cout << itr->first << ':' << itr->second << '\t';
 			cout << endl;
 		}
+	}
 	//calculate scores
 	{
 		vector<double>ClusterTotalScore(Ctgs.CtgNum,0);
@@ -391,32 +331,31 @@ int main(int argc, char* argv[])
 		usage();
 	init();
 	input(argc,argv);
-	system("ps ux");
+	if(INTEST)system("ps ux");
 
 	printtime("Main: before MergeAsStep1. ");
 	MergeAsStep1(Ctgs,Reads,NodePool,uset,acc_tester,AlignThresh);
 	NodePool.clear();
+	/* TODO:
+	 * modify Struct.h to really clear the memory.
+	 */
 	if(INTEST)acc_tester.calAcc(uset);
 
 	printtime("Main: before MetaCluster. ");
+	if(INTEST)system("ps ux");
 	MCPara mcpara(MetaKmerLen, Ctgs, uset, acc_tester);
-	system("ps ux");
 	MetaCluster metacluster(mcpara.KmerLen, mcpara.Size, mcpara.ReverKmerDistri, ClusterSize, MaxSpecies, MinSpecies, mcpara.GenoNum , mcpara.Component);
-	system("ps ux");
+	if(INTEST)system("ps ux");
 	ClusterSize ? (metacluster.muiltkmeans(10,ClusterSize)) : (metacluster.iterMeta(10,MC3_Thresh));
 	metacluster.clear();//best[]&Component[][] are not cleared.
-	system("ps ux");
+	if(INTEST)system("ps ux");
 	printtime("Main: before anaCluster. ");
 	anaCluster(mcpara, metacluster, Reads.ReadNumInCtg,argv);
-	/* ToDo: clear memory
-	 * because outputResult needs O(n)memory, where n is # reads.
-	 */
 	printtime("Main: before output. ");
 	outputResult(Reads.MatchId, Reads.TotalNum, uset,metacluster.best, mcpara,argv[2], TaxoOfClust);
-	system("ps ux");
-
 	if(INTEST)
 	{
+		system("ps ux");
 		printtime("Clustering finished. ");
 		acc_tester.getPreSen4Other(metacluster.getComp(),metacluster.Size,metacluster.best);
 /*		for(int i=0;i<TaxoOfClust.size();++i)
