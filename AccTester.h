@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <set>
@@ -18,6 +19,13 @@
 #include "USet.h"
 
 using namespace std;
+struct PairCmpSecond{
+	bool operator()(const pair<int,int>& p1,const pair<int,int>& p2)
+	{
+		return p1.second < p2.second;
+	}
+};
+
 class AccTester
 {
 public:
@@ -69,9 +77,6 @@ public:
 			if(Reads_CtgId[i]>=0)
 				++CtgComp[Reads_CtgId[i]][All_Reads_GenomeId[i]];
 
-		{
-		}
-
 		UnmapedNum = ReadNum_;
 		Unmaped_Reads_GenomeId.resize(UnmapedNum);
 		for(int i=0;i<UnmapedNum;++i)
@@ -104,6 +109,7 @@ public:
 				Comp[toNewClustId[uset.find(i)]][j] += CtgComp[i][j];
 		for(int i=CtgNum;i<uset.size();++i)
 			++Comp[toNewClustId[uset.find(i)]][Unmaped_Reads_GenomeId[i-CtgNum]];
+
 
 		int Asum = 0, Amax=0;;
 		for(int i=0;i<idx;++i)
@@ -236,6 +242,43 @@ public:
 		cerr << "outlierread: \t"<< outlierread<< endl;
 
 		cout << ">clust matrix." << endl;
+	{
+		vector<pair<int,int> > cid_gid;
+		for(int i=0;i<idx;++i)
+		{
+			int max = 0,maxid=0;
+			for(int j=0;j<GenomeNum;++j)
+				if(Comp[i][j] > max)
+				{
+					max = Comp[i][j];
+					maxid = j;
+				}
+			cid_gid.push_back(make_pair(i,maxid));
+		}
+		PairCmpSecond paircmpsecond;
+		sort(cid_gid.begin(),cid_gid.end(),paircmpsecond);
+		int Asum = 0, Amax=0;;
+		for(int i2=0;i2<idx;++i2)
+		{
+			int i=cid_gid[i2].first;
+			int sum = 0;
+			for(int j=0;j<GenomeNum;++j)
+				sum += Comp[i][j];
+			Asum += sum;
+
+			int max = 0,maxid=0;
+			for(int j=0;j<GenomeNum;++j)
+				if(Comp[i][j] > max)
+				{
+					max = Comp[i][j];
+					maxid = j;
+				}
+			Amax += max;
+			for(int j=0;j<GenomeNum;++j)
+				cerr << Comp[i][j] << '\t';
+			cerr << max/(double)sum << '\t' << maxid << '\t' << sum << endl;
+		}
+	}
 		int Asum = 0, Amax=0;;
 		for(int i=0;i<idx;++i)
 		{
@@ -252,8 +295,6 @@ public:
 					maxid = j;
 				}
 			Amax += max;
-
-//			if(sum < Thresh)continue;
 			for(int j=0;j<GenomeNum;++j)
 				cout << Comp[i][j] << '\t';
 			cout << max/(double)sum << '\t' << maxid << '\t' << sum << endl;
