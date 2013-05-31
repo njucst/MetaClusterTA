@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <omp.h>
 #include "KMER.h"
+#include "GLOBAL.h"
+#include "SmallArray.h"
 
 //typedef unsigned long long INodeRef;
 //const unsigned long long INULL = ~0ULL;
@@ -26,7 +28,7 @@ typedef KMER KmerType;
 //const unsigned long long TRANMASK = 0x3ffffffffffff;
 //const unsigned HASHMASK = 0x3fffffff;
 //const unsigned HASHSIZE = 1U<<30;
-
+using namespace std;
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////functions
 
@@ -83,6 +85,42 @@ struct NodeIDPosi
 	}
 };
 
+class GlobalSmallArray
+{
+private:
+	static SmallArray<NodeIDPosi,2> GlobalArray2;
+	static SmallArray<NodeIDPosi,4> GlobalArray4;
+	static SmallArray<NodeIDPosi,8> GlobalArray8;
+	static SmallArray<NodeIDPosi,16> GlobalArray16;
+public:
+	const static int MaxSmallArrayCapacity = 16;
+	static void clearSmallArrays()
+	{
+		if(!GlobalArray2.isEmpty()){
+			GlobalArray2.clear();
+			GlobalArray4.clear();
+			GlobalArray8.clear();
+			GlobalArray16.clear();
+		}
+	}
+	static NodeIDPosi* getNew(int Capacity)
+	{
+		switch(Capacity)
+		{
+			case 2:
+			   	return GlobalArray2.getNew();
+			case 4:
+			   	return GlobalArray4.getNew();
+			case 8:
+				return GlobalArray8.getNew();
+			case 16:
+				return GlobalArray16.getNew();
+			default:break;
+		}
+		return (new NodeIDPosi[Capacity]);
+	}
+};
+
 #pragma pack()
 class KmerNode
 {
@@ -94,7 +132,7 @@ public:
 	NodeIDPosi* myvector;
 	~KmerNode()
 	{
-		if(myvector)
+		if(myvector && Capacity > GlobalSmallArray::MaxSmallArrayCapacity)
 			delete[] myvector;
 	}
 	void push_back(unsigned ele,unsigned posi)
@@ -104,9 +142,11 @@ public:
 		{
 			Capacity <<= 1;
 			NodeIDPosi* ori = myvector;
-			myvector = new NodeIDPosi[Capacity];
+//			myvector = new NodeIDPosi[Capacity];
+			myvector = GlobalSmallArray::getNew(Capacity);
 			copy(ori,ori+VSize,myvector);
-			delete[]ori;
+			if(Capacity > (GlobalSmallArray::MaxSmallArrayCapacity*2))
+				delete[]ori;
 		}
 		myvector[VSize].id=ele;
 		myvector[VSize].posi=posi;
@@ -118,13 +158,10 @@ public:
 		VSize = 1;
 		Capacity = 2;
 		CtgNum=0;
-		myvector = new NodeIDPosi[2];
+//		myvector = new NodeIDPosi[2];
+		myvector = GlobalSmallArray::getNew(2);
 		myvector[0].set(id,posi);
 		next = NULL;
-	}
-	void mallocVector()
-	{
-		myvector = new NodeIDPosi[VSize];
 	}
 
 	void clear()
@@ -132,7 +169,8 @@ public:
 		VSize = 0;
 		if(myvector!=NULL)
 		{
-			delete[]myvector;
+			if(Capacity > GlobalSmallArray::MaxSmallArrayCapacity)
+				delete[]myvector;
 			myvector = NULL;
 		}
 	}
@@ -148,7 +186,7 @@ public:
 		node.VSize = 0;
 		node.myvector = NULL;
 	}
-private:
+	/////////////////////////////////////////////
 /*	KmerNode(KmerType kmer_,unsigned VSize_,KmerNode* next_)
 	{
 		kmer = kmer_;
@@ -156,6 +194,7 @@ private:
 		next = next_;
 		myvector = NULL;
 	}*/
+private:
 	KmerNode()
 	{
 		VSize = 0;
@@ -219,6 +258,7 @@ public:
 		delete[] AllNodes;
 		NodeNum = 0;
 		AllNodes = NULL;
+		GlobalSmallArray::clearSmallArrays();
 	}
 /*	void reIni()
 	{
@@ -243,6 +283,7 @@ public:
 				delete[] AllNodes[i];
 		delete[]AllNodes;
 		AllNodes = NULL;
+		GlobalSmallArray::clearSmallArrays();
 	}
 
 	KmerNode* getNew(KmerType kmer_,unsigned id_,unsigned posi_)
@@ -358,10 +399,10 @@ private:
 	{
 		AllNodes[id>>RowSizeBit][id&MASK].kmer = kmer_;
 	}
-	void mallocVector(unsigned id)
+/*	void mallocVector(unsigned id)
 	{
 		AllNodes[id>>RowSizeBit][id&MASK].mallocVector();
-	}
+	}*/
 	void push_back(unsigned id,unsigned ele,unsigned posi)
 	{
 		AllNodes[id>>RowSizeBit][id&MASK].push_back(ele,posi);
@@ -374,6 +415,8 @@ private:
 	unsigned long long NodeNum;
 	KmerNodeAloc(const KmerNodeAloc &uset){}
 	const KmerNodeAloc &operator=(const KmerNodeAloc &uset){return *this;}
+private:
+	GlobalSmallArray globalSmallArray;
 };//INodePool;
 ////////////////////////////////////////////////////
 #endif

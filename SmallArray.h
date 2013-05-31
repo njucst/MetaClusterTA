@@ -32,6 +32,17 @@ public:
 		omp_unset_lock(&getnew_lock);
 		return &AllNodes[rowNo][(curNum&MASK)*L];
 	}
+	void test()
+	{
+		unsigned rowNo = NodeNum>>RowSizeBit;
+		for(int i=0;i<rowNo;++i)
+			for(int j=0;j<(RowSize*L);++j)
+				AllNodes[i][j] = i*(RowSize*L)+j;
+	}
+	bool isEmpty()
+	{
+		return NULL==AllNodes;
+	}
 	void clear()
 	{
 		if(NULL==AllNodes)return;

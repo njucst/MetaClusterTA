@@ -1,6 +1,7 @@
 #include <cstdlib>
-#include <iostream>
+#include <cmath>
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <vector>
 #include <string>
@@ -10,6 +11,62 @@ using namespace std;
 bool cmpReads(const KmerNode* p1, const KmerNode* p2)
 {
 	return (p1->VSize - p1->CtgNum) < (p2->VSize - p2->CtgNum);
+}
+
+void calTaxoForCtg_TextClassifier(const BWTs& bwts, const string& str, map<int,map<int,double> >& sp_score,const NCBI_nodes_dmp& NodesDmp)
+{
+//	static const double log_epsilon = log(1.0e-9);
+	static const double log_posi_epsilon = log(1.0e9);
+	set<string>kmers;
+	{
+		string rstr = str;
+		for(int i=0;i<str.length();++i)
+		{
+			char ch = str[str.length()-1-i];
+			switch(ch)
+			{
+				case 'A':rstr[i]='T';break;
+				case 'C':rstr[i]='G';break;
+				case 'G':rstr[i]='C';break;
+				case 'T':rstr[i]='A';break;
+				default:rstr[i]='N';
+			}
+		}
+		int strend = (str.length()-(PARA_ANNOTATION_KMER-1));
+		for(int i=0;i<strend;++i)
+		{
+			kmers.insert( str.substr(i,PARA_ANNOTATION_KMER));
+			kmers.insert(rstr.substr(i,PARA_ANNOTATION_KMER));
+		}
+	}
+	map<int,map<int,pair<double,int> > >level_sp_score;
+	for(set<string>::const_iterator itr = kmers.begin();itr!=kmers.end();++itr)
+	{
+		set<int> gross_cand_taxid;
+	   	bwts.search(*itr, gross_cand_taxid);
+		//////////////////////////////////////////////
+		vector<int>cand_taxid;
+		for(set<int>::const_iterator itr2 = gross_cand_taxid.begin();itr2!=gross_cand_taxid.end();++itr2)
+			if(ForbidTaxid.find(*itr2)==ForbidTaxid.end())
+				cand_taxid.push_back(*itr2);
+		//////////////////////////////////////////////
+		if(cand_taxid.size()==0)continue;
+		double unit = 1.0;//only difference from calTaxoForCtg
+		map<int,map<int,int> >NumOfGenomeContainKmer;
+		for(vector<int>::const_iterator itr2 = cand_taxid.begin();itr2!=cand_taxid.end();++itr2)
+			NodesDmp.addScore2Path(*itr2,1,NumOfGenomeContainKmer);
+		for(map<int,map<int,int> >::const_iterator itr2=NumOfGenomeContainKmer.begin();itr2!=NumOfGenomeContainKmer.end();++itr2)
+			for(map<int,int>::const_iterator itr3=itr2->second.begin();itr3!=itr2->second.end();++itr3)
+			{
+				level_sp_score[itr2->first][itr3->first].first += log(itr3->second) + log_posi_epsilon;
+				++level_sp_score[itr2->first][itr3->first].second;
+			}
+	}
+	const int TotalKmer = kmers.size();
+	for(map<int,map<int,pair<double,int> > >::const_iterator itr=level_sp_score.begin();itr!=level_sp_score.end();++itr)
+		for(map<int,pair<double,int> >::const_iterator itr2=itr->second.begin();itr2!=itr->second.end();++itr2)
+			sp_score[itr->first][itr2->first] = itr2->second.first;// + (TotalKmer-(itr2->second.second))*log_epsilon;
+	
 }
 
 void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_score)

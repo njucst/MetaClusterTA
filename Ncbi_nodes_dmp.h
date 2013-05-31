@@ -32,42 +32,6 @@ struct NcbiNodesDmpStruct
 	}
 };
 
-void topologicalSort(const set<pair<int,int> >& Edge, map<int,int>& result)
-{
-	result.clear();
-	map<int,int>degree;
-	for(set<pair<int,int> >::const_iterator itr=Edge.begin();itr!=Edge.end();++itr)
-	{
-		degree[itr->first];
-		++degree[itr->second];
-	}
-	int ridx=1;
-	while(!degree.empty())
-	{
-		int id0=-1;
-		for(map<int,int>::const_iterator itr=degree.begin();itr!=degree.end();++itr)
-		{
-			if(itr->second == 0)
-			{
-				id0 = itr->first;
-				break;
-			}
-		}
-		assert(id0 >= 0);
-		result[id0]=ridx++;
-		degree.erase(id0);
-		for(set<pair<int,int> >::const_iterator itr=Edge.begin();itr!=Edge.end();++itr)
-			if(itr->first==id0)
-				--degree[itr->second];
-	}
-	/*
-	for(set<pair<int,int> >::const_iterator itr=Edge.begin();itr!=Edge.end();++itr)
-		cerr << "edge: " << itr->first << '\t' << itr->second << endl;
-	for(map<int,int>::const_iterator itr=degree.begin();itr!=degree.end();++itr)
-		cerr << "extra: " << itr->first << '\t' << itr->second << endl;
-	*/
-}
-
 class NCBI_nodes_dmp
 {
 public:
@@ -149,7 +113,39 @@ public:
 		}
 		////////////////////////////////////////////////////
 	}
-	void addScore2Path(int leaf,double score,map<int,map<int,double> >&Node_Score)
+
+	void topologicalSort(const set<pair<int,int> >& Edge, map<int,int>& result)
+	{
+		result.clear();
+		map<int,int>degree;
+		for(set<pair<int,int> >::const_iterator itr=Edge.begin();itr!=Edge.end();++itr)
+		{
+			degree[itr->first];
+			++degree[itr->second];
+		}
+		int ridx=1;
+		while(!degree.empty())
+		{
+			int id0=-1;
+			for(map<int,int>::const_iterator itr=degree.begin();itr!=degree.end();++itr)
+			{
+				if(itr->second == 0)
+				{
+					id0 = itr->first;
+					break;
+				}
+			}
+			assert(id0 >= 0);
+			result[id0]=ridx++;
+			degree.erase(id0);
+			for(set<pair<int,int> >::const_iterator itr=Edge.begin();itr!=Edge.end();++itr)
+				if(itr->first==id0)
+					--degree[itr->second];
+		}
+	}
+
+	template<class T>
+	void addScore2Path(int leaf,T score,map<int,map<int,T> >&Node_Score)const
 	{
 //		assert(leaf>=0 && leaf < MAXTAXID);
 		if(leaf<0 || leaf>=MAXTAXID)
@@ -161,6 +157,7 @@ public:
 		}
 		Node_Score[TreeNodes[leaf].levelId][leaf] += score;
 	}
+
 	int getMaxTaxId()const
 	{ 
 		return MaxTaxId;

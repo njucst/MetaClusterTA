@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,8 +14,20 @@
 #include <set>
 #include <omp.h>
 
+/*
+#include "GLOBAL.h"
+#include "Utils.h"
+#include "CtgsReads.h"
+#include "BaseStr.h"
+#include "AccTester.h"
+#include "MetaCluster.h"
+#include "USet.h"
+*/
+
+//#include "GenomeDB_KmerDistri.h"
 #include "Methods.h"
 #include "MCPara.h"
+#include "Ncbi_nodes_dmp.h"
 using namespace std;
 /////////////////////////////////////////////////////////////////////
 static const unsigned UNASSIGNED  = ~(0U);
@@ -47,7 +58,7 @@ USet uset;
 NCBI_nodes_dmp NodesDmp;
 //GenomesClass GenoDB;
 //DBEntropy GenoDB;
-vector<map<int,map<int,double> > >TaxoInfo;
+vector<map<int,double> >TaxoInfo;
 vector<ClustTaxoInfoClass> TaxoOfClust;
 
 AccTester acc_tester;
@@ -210,7 +221,7 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	///////////////////////////////////////////////////////////////////////
 	TaxoInfo.resize(Ctgs.CtgNum);
 	if(INTEST){
-		printtime("Before initiating bwts. ");
+		printtime("Before initiating contigs. ");
 		system("ps ux");
 	}
 	BWTs bwts(argv[3]);
@@ -222,31 +233,27 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	///////////////////////////////////////////////////
 #pragma omp parallel for schedule(dynamic)
 	for(int i=0;i<Ctgs.CtgNum;++i)
-		calTaxoForCtg_TextClassifier(bwts, Ctgs.contigs[i]->str, TaxoInfo[i], NodesDmp);
+		calTaxoForCtg(bwts, Ctgs.contigs[i]->str, TaxoInfo[i]);
+	system("ps ux");
 	bwts.clear();
 	if(INTEST){
 		system("ps ux");
 		for(int i=0;i<Ctgs.CtgNum;++i)
 		{
 			cout << " Contig score: " << i << '\t' << Ctgs.contigs[i]->str.length() << '\t';
-			for(map<int,map<int,double> >::const_iterator itr=TaxoInfo[i].begin();itr!=TaxoInfo[i].end();++itr)
-			{
-				cout << itr->first << '(';
-				for(map<int,double>::const_iterator itr2=itr->second.begin();itr2!=itr->second.end();++itr2)
-					if(itr2->second >= 0.4*(Ctgs.contigs[i]->str.length()))
-						cout << itr2->first <<':' << itr2->second << '\t';
-				cout << ")\t";
-			}cout << endl;
+			for(map<int,double>::const_iterator itr=TaxoInfo[i].begin();itr!=TaxoInfo[i].end();++itr)
+				if(itr->second >= 0.4*(Ctgs.contigs[i]->str.length()))
+					cout << itr->first << ':' << itr->second << '\t';
+			cout << endl;
 		}
 	}
 	//calculate scores
 	{
-	/*	const double log_epsi = log(1e-9);
 		vector<double>ClusterTotalScore(Ctgs.CtgNum,0);
 		for(int i=0;i<CtgIdInCluster.size();++i)
 			for(int j=0;j<CtgIdInCluster[i].size();++j)
 				ClusterTotalScore[i] += Ctgs.contigs[CtgIdInCluster[i][j]]->str.length();
-				for(map<int,double>::const_iterator itr=TaxoInfo[CtgIdInCluster[i][j]].begin();itr!=TaxoInfo[CtgIdInCluster[i][j]].end();++itr)
+		/*		for(map<int,double>::const_iterator itr=TaxoInfo[CtgIdInCluster[i][j]].begin();itr!=TaxoInfo[CtgIdInCluster[i][j]].end();++itr)
 					ClusterTotalScore[i] += itr->second;*/
 		//////////////////////////////////////////////////////////////////
 		if(INTEST)printtime("Before calculating scores:");
@@ -255,12 +262,6 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 		for(vector<vector<int> >::const_iterator itr1= CtgIdInCluster.begin();itr1!=CtgIdInCluster.end();++itr1,++cidx)
 		{
 			map<int,map<int,double> >Node_Score;//TaxonLevel,TaxId,Score
-			for(vector<int>::const_iterator itr2 = itr1->begin();itr2!=itr1->end();++itr2)
-				for(map<int,map<int,double> >::const_iterator itr3=TaxoInfo[*itr2].begin();itr3!=TaxoInfo[*itr2].end();++itr3)
-					for(map<int,double>::const_iterator itr4=itr3->second.begin();itr4!=itr3->second.end();++itr4)
-						Node_Score[itr3->first][itr4->first] += itr4->second;
-
-			/*
 			for(vector<int>::const_iterator itr2 = itr1->begin();itr2!=itr1->end();++itr2)
 			{
 				int tmaxid;double tmaxv = 0;
@@ -273,12 +274,16 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 					}
 				}
 				NodesDmp.addScore2Path(tmaxid, Ctgs.contigs[*itr2]->str.length(), Node_Score);
-			}*/
+			}
+/*			map<int,map<int,double> >Node_Score;//TaxonLevel,TaxId,Score
+			for(vector<int>::const_iterator itr2 = itr1->begin();itr2!=itr1->end();++itr2)
+				for(map<int,double>::const_iterator itr3 = TaxoInfo[*itr2].begin();itr3!=TaxoInfo[*itr2].end();++itr3)
+					NodesDmp.addScore2Path(itr3->first, itr3->second, Node_Score);*/
 	
 			for(map<int,map<int,double> >::const_iterator itr2= Node_Score.begin();itr2!=Node_Score.end();++itr2)
 			{
-				int maxTaxoid = 0;double maxScore = -1e9;
-				int maxTaxoid2 = 0;double maxScore2 = -1e9;
+				int maxTaxoid = 0;double maxScore = 0;
+				int maxTaxoid2 = 0;double maxScore2 = 0;
 				double TotalScore = 0;
 				for(map<int,double>::const_iterator itr3 = itr2->second.begin();itr3!=itr2->second.end();++itr3)
 				{
@@ -311,7 +316,7 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 		{
 			cout <<"cluster score: " << cidx << '\t';
 			for(int i=0;i<40;++i)
-//				if(itr->taxo[i].score > 1e-9)
+				if(itr->taxo[i].score > 1e-9)
 					cout <<NodesDmp.Id2LevelName[i]<<":"<<(itr->taxo[i].score)<<'\t';
 			cout << endl;
 		}
@@ -330,10 +335,8 @@ int main(int argc, char* argv[])
 	printtime("Main: before MergeAsStep1. ");
 	MergeAsStep1(Ctgs,Reads,NodePool,uset,acc_tester,AlignThresh);
 	NodePool.clear();
-//	GlobalSmallArray::clearSmallArrays();
 	/* TODO:
-	 * 1.modify Struct.h to really clear the memory.
-	 * 2.add index(1M) into BWT
+	 * modify Struct.h to really clear the memory.
 	 */
 	if(INTEST)acc_tester.calAcc(uset);
 

@@ -15,11 +15,13 @@
 //#include "DBEntropy.h"
 #include "MCPara.h"
 #include "BWTs.h"
+#include "Ncbi_nodes_dmp.h"
 using namespace std;
 
 bool cmp(const KmerNode* p1, const KmerNode* p2);
 
-//void calTaxoForCtg(const BWTs &bwts, const string& str, map<int,double>& sp_score);
+//void calTaxoForCtg_TextClassifier(const BWTs& bwts, const string& str, map<int,double>& sp_score);
+void calTaxoForCtg_TextClassifier(const BWTs& bwts, const string& str, map<int,map<int,double> >& sp_score,const NCBI_nodes_dmp& NodesDmp);
 void calTaxoForCtg(const BWTs& bwts, const string& str, map<int,double>& sp_score);
 void compa_read(int ReadLen,const int &position1,const int &position2,int &match,int &mismatch,const ULLN &read1,const ULLN &read2);
 void MergeReads(const KmerNodeAloc& NodePool, const ReadsClass& Reads, USet& uset, int CtgNum);

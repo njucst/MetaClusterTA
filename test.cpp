@@ -2,18 +2,39 @@
 #include <cassert>
 #include <fstream>
 #include <cstdio>
+#include <cmath>
 #include <cstring>
 #include <string>
 #include <dirent.h>
 #include <cstdlib>
+#include "SmallArray.h"
 using namespace std;
 struct Node{
 	int id,posi;
 };
 int main()
 {
-	const int N=250000000;
-	Node ** V=new Node*[N];
+	cerr << log(1.0e-9) << endl;;
+	const int N=250000;
+
+	const int L = 2; 
+	system("ps ux");
+	SmallArray <int,L> SA2;
+	int ** V=new int*[N];
+	for(int i=0;i<N;++i)
+		V[i] = SA2.getNew();
+
+	SA2.test();
+	for(int i=0;i<10;++i)
+		for(int j=0;j<L;++j)
+			cout << V[i][j] << endl;
+
+	system("ps ux");
+//	delete[] V[0];
+	SA2.clear();
+	delete[]V;
+	system("ps ux");
+
 /*	for(int i=0;i<N;++i)
 		V[i] = (Node*)malloc(2*sizeof(Node));
 	system("ps ux");
@@ -23,9 +44,5 @@ int main()
 	delete[]V;
 	system("ps ux");*/
 
-	Node p[1000][2];
-	for(int i=0;i<1000;++i)
-		V[i] = p[i];
-	cerr << sizeof(p) << '\t' << sizeof(V)<<endl;
 	return 0;
 }
