@@ -6,7 +6,7 @@
 
 #define MCH_HYBRID_KMERDISTRIPARA_H_
 #include<vector>
-#include"TomAlgorithm.h"
+#include "TomAlgorithm.h"
 using namespace std;
 class KmerDistriPara
 {

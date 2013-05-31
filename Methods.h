@@ -8,11 +8,7 @@
 #define MCH_HYBRID_METHODS_H_
 
 #include <iostream>
-#include "CtgsReads.h"
-#include "MetaCluster.h"
-#include "AccTester.h"
 #include "SparseMatrix.h"
-//#include "DBEntropy.h"
 #include "MCPara.h"
 #include "BWTs.h"
 #include "Ncbi_nodes_dmp.h"

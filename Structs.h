@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <omp.h>
 #include "KMER.h"
-#include "GLOBAL.h"
 #include "SmallArray.h"
 
 //typedef unsigned long long INodeRef;

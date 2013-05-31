@@ -1,5 +1,5 @@
-MetaClusterTA:  MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o Structs.o
-	g++ -fopenmp MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o ShortKMER.o USet.o Reader.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o Structs.o -o MetaClusterTA
+MetaClusterTA:  MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o USet.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o Structs.o
+	g++ -fopenmp MetaClusterTA.cpp Methods.o MetaCluster.o TomAlgorithm.o BaseStr.o ULLN.o KMER.o USet.o Utils.o GLOBAL.o BWTs.o BWTDtStr.o Structs.o -o MetaClusterTA
 
 Methods.o: Methods.h Methods.cpp
 	g++ -fopenmp Methods.h Methods.cpp -c
@@ -7,14 +7,14 @@ Methods.o: Methods.h Methods.cpp
 MetaCluster.o: MetaCluster.cpp MetaCluster.h
 	g++ -fopenmp MetaCluster.cpp MetaCluster.h -c
 
-Reader.o: Reader.h Reader.cpp
-	g++ -fopenmp Reader.h Reader.cpp -c
+#Reader.o: Reader.h Reader.cpp
+#	g++ -fopenmp Reader.h Reader.cpp -c
 
 TomAlgorithm.o: TomAlgorithm.cpp TomAlgorithm.h
 	g++ -fopenmp TomAlgorithm.cpp  TomAlgorithm.h -c
 
-ShortKMER.o: ShortKMER.h ShortKMER.cpp
-	g++ -fopenmp ShortKMER.h ShortKMER.cpp -c
+#ShortKMER.o: ShortKMER.h ShortKMER.cpp
+#	g++ -fopenmp ShortKMER.h ShortKMER.cpp -c
 
 KMER.o: KMER.h KMER.cpp
 	g++ -fopenmp KMER.h KMER.cpp -c

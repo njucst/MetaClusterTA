@@ -6,7 +6,6 @@
 #include <set>
 
 #include "MetaCluster.h"
-#include "TomAlgorithm.h"
 #include "USet.h"
 
 using namespace std;

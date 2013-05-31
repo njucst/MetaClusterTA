@@ -2,7 +2,6 @@
 
 #define MCH_HYBRID_GLOBAL_H_
 #include <set>
-//#include "SmallArray.h"
 
 const bool INTEST = true;
 extern unsigned U64HASH[10];

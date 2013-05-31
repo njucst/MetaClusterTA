@@ -7,7 +7,6 @@
 #define MCH_HYBRID_MCPARA_H_
 #include <map>
 #include "MetaCluster.h"
-#include "USet.h"
 #include "CtgsReads.h"
 class MCPara
 {

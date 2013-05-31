@@ -16,7 +16,6 @@
 #include <omp.h>
 
 #include "Methods.h"
-#include "MCPara.h"
 using namespace std;
 /////////////////////////////////////////////////////////////////////
 static const unsigned UNASSIGNED  = ~(0U);
