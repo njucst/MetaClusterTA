@@ -29,11 +29,6 @@ private:
 	static const int L1 = 128;//in terms of bits
 	static const int L2 = 32;//in terms of bits
 
-	static const unsigned IdxNuc = 10;
-	static const unsigned IdxNumber = 1<<(2*IdxNuc);
-	vector<long long> IdxStart;
-	vector<long long> IdxEnd;
-
 	unsigned char No_Of_Ones_In[1U<<16];
 	unsigned short* bits[4];
 	unsigned* AppearL1[4];
@@ -42,7 +37,6 @@ private:
 	int SL1,SL2,bitL;
 
 	long long getAppear(int ch, long long posi)const;
-	pair<long long, long long> naiveSearch(const vector<int>& query)const;
-	pair<long long, long long> naiveSearchBeginWith(const vector<int>& query,long long s_start,long long s_end)const;
+	pair<long long, long long> search(const vector<int>& query)const;
 };
 #endif

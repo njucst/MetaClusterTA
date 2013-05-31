@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -18,9 +19,9 @@
 #include "Methods.h"
 using namespace std;
 /////////////////////////////////////////////////////////////////////
-static const unsigned UNASSIGNED  = ~(0U);
-const double ScoreThresh = -1.0;
 //parameters
+//static const unsigned UNASSIGNED  = ~(0U);
+//const double ScoreThresh = -1.0;
 int ReadLen = 80;
 int MetaKmerLen = 5;
 int ClusterSize = 0;
@@ -35,22 +36,17 @@ int Num_Thread = 0;
 int CtgLenThresh = 500;
 int AlignThresh = 76;
 /////////////////////////////////////////////////////////////////////
-time_t rawtime;
-struct tm* timeinfo;
-
+//global variables
 KmerNode** KmerMap;
 ContigsClass Ctgs;
 ReadsClass Reads;
 KmerNodeAloc NodePool;
 USet uset;
 NCBI_nodes_dmp NodesDmp;
-//GenomesClass GenoDB;
-//DBEntropy GenoDB;
 vector<map<int,map<int,double> > >TaxoInfo;
 vector<ClustTaxoInfoClass> TaxoOfClust;
 
 AccTester acc_tester;
-
 ////////////////////////////////////////////////////////////////////////////
 void usage()
 {
@@ -61,6 +57,8 @@ void usage()
 
 void printtime(string str = "")
 {
+	static time_t rawtime;
+	static tm* timeinfo;
 	cerr << str << endl;
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
@@ -329,10 +327,8 @@ int main(int argc, char* argv[])
 	printtime("Main: before MergeAsStep1. ");
 	MergeAsStep1(Ctgs,Reads,NodePool,uset,acc_tester,AlignThresh);
 	NodePool.clear();
-//	GlobalSmallArray::clearSmallArrays();
 	/* TODO:
-	 * 1.modify Struct.h to really clear the memory.
-	 * 2.add index(1M) into BWT
+	 * 1.add index(1M) into BWT
 	 */
 	if(INTEST)acc_tester.calAcc(uset);
 

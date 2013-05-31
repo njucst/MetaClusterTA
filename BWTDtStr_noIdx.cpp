@@ -1,7 +1,6 @@
 #include "BWTDtStr.h"
 #include <iostream>
 #include <fstream>
-#include <omp.h>
 using namespace std;
 
 void BWTDtStr::iniStatic()
@@ -28,7 +27,6 @@ BWTDtStr::BWTDtStr()
 		No_Of_Ones_In[i] = oneN;
 	}
 }
-
 void BWTDtStr::preprocess(char* bwt_in_DESIGN_format, int* Taxid_of_SA_)
 {
 	Taxid_of_SA = Taxid_of_SA_;
@@ -118,31 +116,6 @@ cerr << "bwtdtstr length: " << length << endl;
 				Count[i] = 0;
 		}
 	}
-	//////////////////////////////////////////////////
-	//build index
-	IdxStart.resize(IdxNumber);
-	IdxEnd.resize(IdxNumber);
-#pragma omp parallel for 
-	for(unsigned i=0;i<IdxNumber;++i)
-	{
-		vector<int> query(IdxNuc,0);
-		for(unsigned tidx = IdxNuc-1, x=i;x;--tidx)
-		{
-			query[tidx] = x&0x3;
-			x >>= 2;
-		}
-		pair<long long, long long> ans = naiveSearch(query);
-		if(ans.second < ans.first)
-		{
-			IdxStart[i] = 1;
-			IdxEnd[i] = 0;
-		}
-		else
-		{
-			IdxStart[i] = ans.first;
-			IdxEnd[i] = ans.second;
-		}
-	}
 }
 long long BWTDtStr::getAppear(int ch, long long posi)const
 {
@@ -155,64 +128,34 @@ long long BWTDtStr::getAppear(int ch, long long posi)const
 //		ans += No_Of_Ones_In[(bits[ch][posi/16] << (16-posi%16))&0xffff];
 	return ans;
 }
-
-inline int nucToInt(const char ch)
-{
-	switch(ch)
-	{
-		case 'A':return 0;
-		case 'C':return 1;
-		case 'G':return 2;
-		case 'T':return 3;
-		case 'a':return 0;
-		case 'c':return 1;
-		case 'g':return 2;
-		case 't':return 3;
-	}
-	return -1;
-}
 pair<long long, long long> BWTDtStr::search(const string& P)const
 {
 	if(P.length()==0)
 		return make_pair(1ULL,0ULL);
+	vector<int> query(P.length());
 	for(unsigned i=0;i<P.length();++i)
-		if(nucToInt(P[i])<0)return make_pair(1ULL,0ULL);
-	if(P.length() <= IdxNuc)
 	{
-		vector<int> query(P.length());
-		for(unsigned i=0;i<P.length();++i)
-			query[i] = nucToInt(P[i]);
-		return naiveSearch(query);
+		switch(P[i])
+		{
+			case 'A':query[i]=0;break;
+			case 'C':query[i]=1;break;
+			case 'G':query[i]=2;break;
+			case 'T':query[i]=3;break;
+			case 'a':query[i]=0;break;
+			case 'c':query[i]=1;break;
+			case 'g':query[i]=2;break;
+			case 't':query[i]=3;break;
+			default: return make_pair(1ULL,0ULL);
+		}
 	}
-
-	unsigned anchor = 0;
-	for(int i=P.length()-IdxNuc;i<P.length();++i)
-	{
-		anchor <<= 2;
-		anchor |= nucToInt(P[i]);
-	}
-	vector<int> query(P.length()-IdxNuc);
-	for(unsigned i=0;i<(P.length()-IdxNuc);++i)
-		query[i] = nucToInt(P[i]);
-	return naiveSearchBeginWith(query,IdxStart[anchor],IdxEnd[anchor]);
+	return search(query);
 }
-pair<long long, long long> BWTDtStr::naiveSearch(const vector<int>& query)const
+pair<long long, long long> BWTDtStr::search(const vector<int>& query)const
 {
 	vector<int>::const_reverse_iterator itr= query.rbegin();
 	long long first = Count[*itr];
 	long long last = Count[(*itr)+1]-1;
 	for(++itr;itr!=query.rend() && first<=last;++itr)
-	{
-		first = Count[*itr] + getAppear(*itr, first);
-		last  = Count[*itr] + getAppear(*itr, last+1)-1;
-	}
-	return make_pair(first,last);
-}
-pair<long long, long long> BWTDtStr::naiveSearchBeginWith(const vector<int>& query,long long s_start,long long s_end)const
-{
-	long long first = s_start;
-	long long last = s_end;
-	for(vector<int>::const_reverse_iterator itr= query.rbegin();itr!=query.rend() && first<=last;++itr)
 	{
 		first = Count[*itr] + getAppear(*itr, first);
 		last  = Count[*itr] + getAppear(*itr, last+1)-1;
