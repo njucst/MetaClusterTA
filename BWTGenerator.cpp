@@ -57,59 +57,6 @@ void BWTGenerator::dc3(unsigned *r,unsigned *sa,long long n,long long m)
 		sa[p]=wb[j++];
     return;
 }
-/*
-bool BWTGenerator::c0(unsigned *r,long long a,long long b)
-{
-	return r[a]==r[b]&&r[a+1]==r[b+1]&&r[a+2]==r[b+2];
-}
-bool BWTGenerator::c12(long long k,unsigned *r,long long a,long long b)
-{
-	if(k==2) return r[a]<r[b]||r[a]==r[b]&&c12(1,r,a+1,b+1);
-	else return r[a]<r[b]||r[a]==r[b]&&wv[a+1]<wv[b+1];
-}
-void BWTGenerator::sort(unsigned *r,unsigned *a,unsigned *b,long long n,long long maxm)
-{
-    long long i;
-    for(i=0;i<n;i++) wv[i]=r[a[i]];
-    for(i=0;i<maxm;i++) ws[i]=0;
-    for(i=0;i<n;i++) ws[wv[i]]++;
-    for(i=1;i<maxm;i++) ws[i]+=ws[i-1];
-    for(i=n-1;i>=0;i--) b[--ws[wv[i]]]=a[i];
-    return;
-}
-void BWTGenerator::dc3(unsigned *r,unsigned *sa,long long n,long long maxm)
-{
-    long long i,j,ta=0,tb=(n+1)/3,tbc=0,p;
-	unsigned* san = sa+n;
-	unsigned *rn = r+n;
-    r[n]=r[n+1]=0;
-    for(i=0;i<n;i++) if(i%3!=0) wa[tbc++]=i;
-    sort(r+2,wa,wb,tbc,maxm);
-    sort(r+1,wb,wa,tbc,maxm);
-    sort(r,wa,wb,tbc,maxm);
-    for(p=1,rn[F(wb[0])]=0,i=1;i<tbc;i++)
-        rn[F(wb[i])]=c0(r,wb[i-1],wb[i])?p-1:p++;
-    if(p<tbc) 
-		dc3(rn,san,tbc,p);
-    else 
-		for(i=0;i<tbc;i++) 
-			san[rn[i]]=i;
-    for(i=0;i<tbc;i++) 
-		if(san[i]<tb) 
-			wb[ta++]=san[i]*3;
-    if(n%3==1) 
-		wb[ta++]=n-1;
-    sort(r,wb,wa,ta,maxm);
-    for(i=0;i<tbc;i++) 
-		wv[wb[i]=G(san[i])]=i;
-    for(i=0,j=0,p=0;i<ta && j<tbc;p++)
-        sa[p]=c12(wb[j]%3,r,wa[i],wb[j])?wa[i++]:wb[j++];
-    for(;i<ta;p++) 
-		sa[p]=wa[i++];
-    for(;j<tbc;p++) 
-		sa[p]=wb[j++];
-    return;
-}*/
 long long BWTGenerator::inputToStr(char* input)
 {
 	long long Len = strlen(input);
@@ -163,8 +110,9 @@ int BWTGenerator::binary_search_taxid(int sa_idx)
 			max_ = mid_;
 	}
 	if(BinarySearchTable[min_].first >= sa_idx)
-		return BinarySearchTable[min_].second;
-	return -2;
+		return min_;
+//		return BinarySearchTable[min_].second;
+	return BinarySearchTable.size();
 }
 
 inline char to3bits(char c1)
@@ -189,35 +137,23 @@ void BWTGenerator::outputSA_BWT_Taxid(string outfile, long long bwtstridx )
 {
 	ofstream ofs(outfile.c_str(), ios_base::out|ios_base::app|ios_base::binary);
 	assert(!ofs.fail());
-
 	for(long long i=0;i<bwtstridx;i+=2)
 		ofs << combine_chars(bwt[i],bwt[i+1]);
 	ofs << endl;
 	for(long long i=0;i<bwtstridx;++i)
 		SA[i]=binary_search_taxid(SA[i]);
 	ofs.write((char*)SA,bwtstridx*4); 
+	////////////////////////////////////////////
+	int* Id2Taxon = new int[BinarySearchTable.size()+1];
+	Id2Taxon[0] = BinarySearchTable.size();
+	for(int i=0;i<BinarySearchTable.size();++i)
+		Id2Taxon[i+1] = BinarySearchTable[i].second;
+	ofs.write((char*)Id2Taxon,(BinarySearchTable.size()+1)*4);
+	delete[]Id2Taxon;
+	////////////////////////////////////////////
 	ofs.close();
 //	cerr << "length: " << bwtstridx << '\t' << (int)bwt[((bwtstridx-1)>>1)<<1] << '\t' << (int)combine_chars(bwt[0],bwt[1])<<'\t'<<(int)combine_chars(bwt[2],bwt[3])<< '\t'<<(int)combine_chars(bwt[((bwtstridx-3)>>1)<<1],bwt[(((bwtstridx-3)>>1)<<1)+1])<<'\t' <<(int) combine_chars(bwt[((bwtstridx-1)>>1)<<1],bwt[(((bwtstridx-1)>>1)<<1)+1])<< endl;
 }
-//	ofs << bwt << endl;
-	//	ofs << binary_search_taxid(SA[i])<<' ';
-	/*
-	for(long long i=0;i<bwtstridx;++i)
-		ofs << bwt[i];
-	ofs << endl;
-	for(long long i=0;i<bwtstridx;++i)
-		ofs << binary_search_taxid(SA[i]) << ' ';
-	ofs << endl;
-	ofs << inputstr << endl;
-
-	for(vector<pair<int,int> >::const_iterator itr=BinarySearchTable.begin();itr!=BinarySearchTable.end();++itr)
-		ofs << itr->first <<','<<itr->second<<';';
-	ofs << endl;
-	for(long long i=0;i<bwtstridx;++i)
-		ofs << SA[i] << ' ';
-	ofs << endl;
-	ofs.close();
-	*/
 /////////////////////////////////////////////////////////////////////
 //input from complete genomes
 void getFilePaths(std::string FoldPath, std::vector<std::string>& filepaths)
@@ -293,6 +229,7 @@ void BWTGenerator::calBWTfromCompleGenome(std::string FoldPath,std::string gi_ta
 	char* genome = new char[40000000];
 	long long bwtstridx = 0;
 	int fileidx = 0;
+	vector<string> usedFileInfo;
 	for(vector<string>::const_iterator itr = filepaths.begin();itr!=filepaths.end();++itr)
 	{
 		cerr << "Processing file " << fileidx++ << " : " << (*itr) << endl;
@@ -335,6 +272,10 @@ void BWTGenerator::calBWTfromCompleGenome(std::string FoldPath,std::string gi_ta
 		bwtstridx += charidx;
 		BinarySearchTable.push_back(make_pair(bwtstridx,Gi_Taxid[current_gi]));
 		ifs.close();
+		/////////////////////////////////////////////////
+		char ginfo[100];
+		sprintf(ginfo,"%d\t%d\t%d\t\0",current_gi,Gi_Taxid[current_gi],charidx-1);
+		usedFileInfo.push_back(string(ginfo)+(itr->c_str()));
 	}
 	if(bwtstridx > 0)
 	{
@@ -343,6 +284,12 @@ void BWTGenerator::calBWTfromCompleGenome(std::string FoldPath,std::string gi_ta
 	}
 	delete[] genome;
 	delete[] Gi_Taxid;
+	ofstream ofs((outfile+".info").c_str());
+	if(!ofs.fail()){
+		for(vector<string>::const_iterator itr= usedFileInfo.begin();itr!=usedFileInfo.end();++itr)
+			ofs << *itr << endl;
+	}
+	ofs.close();
 }
 //
 //////////////////////////////////////////////////////////////////////////

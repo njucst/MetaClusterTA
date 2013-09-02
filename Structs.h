@@ -51,10 +51,12 @@ struct SimpleTaxoInfoClass
 };
 struct ClustTaxoInfoClass
 {
+	int taxon,level;
 	vector<SimpleTaxoInfoClass> taxo;
 	vector<double> alignscore;
 	ClustTaxoInfoClass()
 	{
+		taxon = 0;level = -1;
 		taxo.resize(40);
 		alignscore.resize(40);
 	}

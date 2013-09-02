@@ -17,7 +17,7 @@ using namespace std;
 class BWTs
 {
 public:
-	void search(const string& str,set<int>& ans)const;
+	void search(const string& str,set<pair<int,int> >& ans)const;
 
 	explicit BWTs(string filepath);
 	void clear();

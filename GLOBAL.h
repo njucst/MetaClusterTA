@@ -12,6 +12,7 @@ extern double confidence[129];
 const long long MAXLENGTH = 14000000;
 const long long MAXLINE = 500;
 */
+extern double TN_WEIGHT;
 
 
 #endif

@@ -141,6 +141,15 @@ ULLN& ULLN::operator <<= (const int obj)
 	return (*this);
 }
 
+inline unsigned diffsearch(unsigned long long a)
+{
+	unsigned long  pos = 0;
+	__asm__("bsrq %1,%0\n\t"
+					: "+r" (pos)
+					: "rm" (a));
+	return pos;
+}
+
 int ULLN::non0base()
 {
 	int result = 0;

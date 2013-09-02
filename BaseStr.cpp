@@ -145,6 +145,15 @@ BaseStr& BaseStr::operator <<= (const int obj)
 	return (*this);
 }
 
+inline unsigned diffsearch(unsigned long long a)
+{
+	unsigned long  pos = 0;
+	__asm__("bsrq %1,%0\n\t"
+					: "+r" (pos)
+					: "rm" (a));
+	return pos;
+}
+
 int BaseStr::non0base()
 {
 	int result = 0;
@@ -156,15 +165,6 @@ int BaseStr::non0base()
 	}
 	return result;
 }
-
-/*void BaseStr::resize(int ulls)
-{
-	if(ULL_SIZE != ulls && ulls>0)
-	{
-		delete[]U64;
-		U64 = new unsigned long long[ulls];
-	}
-}*/
 
 BaseStr BaseStr::operator >> (const int obj) const
 {

@@ -60,6 +60,7 @@ public:
 			if(AllNodes[i] != NULL)
 				delete[] AllNodes[i];
 		delete[]AllNodes;
+		AllNodes = NULL;
 	}
 private:
 	const static int RowSizeBit = 16;

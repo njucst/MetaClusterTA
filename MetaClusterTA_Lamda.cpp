@@ -192,8 +192,6 @@ const int L8[] = {4,6,10,15,19,22,26};
 const int NL = 7;
 void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadNumInCtg,char* argv[])
 {
-		NodesDmp.init(argv[4]);
-		//////////////////////////////////////////////////////////////////
 	if(INTEST){
 		///////////////////////////////////////////////
 		//initial Forbid
@@ -221,38 +219,9 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 		static int ForbidNum = Forbid.size();
 		cerr << ForbidNum << '\t' << acc_tester.GenomeNum << endl;
 		assert(ForbidNum == acc_tester.GenomeNum);
-		//////////////////////////////////////////////////////////////////
 		for(int i=0;i<ForbidNum;++i)
 			ForbidTaxid.insert(Fid2Taxid[Forbid[i]]);
-		{
-			set<int>tax4;
-			for(int j=1;j<4;++j){
-				for(int i=j*ForbidNum/4;i<(j+1)*ForbidNum/4;++i){
-					vector<int> tTaxon = NodesDmp.getTaxo(Fid2Taxid[Forbid[i]]);
-					tax4.insert(tTaxon[L8[j-1]]);
-				}
-			}
-			ifstream ifs("/home/ywang/SA/Bac_Sa.idx.info");
-			assert(!ifs.fail());
-			const int bMAX = 1000;
-			char buf[bMAX];
-			int tidx = 0;
-			for(;!ifs.eof();++tidx){
-				ifs.getline(buf,bMAX);
-				int tmp,taxid=-1;
-				sscanf(buf,"%d\t%d",&tmp,&taxid);
-				vector<int> tTaxon = NodesDmp.getTaxo(taxid);
-				for(int i=0;i<5;++i){
-					if(tax4.find(tTaxon[L8[i]])!=tax4.end())
-						ForbidTaxid.insert(taxid);
-				}
-			}
-			ifs.close();
-		}
-		/*
 		cerr << "# Forbidden Taxids:" << ForbidTaxid.size() << endl;
-		*/
-		//////////////////////////////////////////////////////////////////
 		for(int i=0;i<Ctgs.CtgNum;++i){
 			char tbuf[100];
 			sscanf(Ctgs.info[i].c_str(),"%s\t%d/%d\t%d", tbuf,&spInfoOfCtgs[i].matchedLength,&spInfoOfCtgs[i].length,&spInfoOfCtgs[i].spFId);
@@ -285,6 +254,7 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	///////////////////////////////////////////////////////////////////////
 	if(INTEST){printtime("Before initiating bwts. ");system("ps ux");}
 	BWTs bwts(argv[3]);
+	NodesDmp.init(argv[4]);
 	if(INTEST){printtime("Before Annotating contigs:");system("ps ux");}
 	vector<map<pair<int,int>,double> >taxid_score(Ctgs.CtgNum);
 #pragma omp parallel for schedule(dynamic)
@@ -294,8 +264,8 @@ void anaCluster(MCPara& mcpara, MetaCluster& metacluster,vector<unsigned>& ReadN
 	bwts.clear();
 	///////////////////////////////////////////////////
 	////cal lamda
-	map<int,vector<double> >TaxonLamda;
-	map<int,vector<double> >TaxonPrec;
+	map<int,double> TaxonLamda;
+	map<int,double> TaxonPrec;
 	getLamda(NodesDmp,(string(argv[3])+".info"),argv[5],TaxonLamda,TaxonPrec);
 	///////////////////////////////////////////////////
 	//anotate clusters
@@ -306,14 +276,9 @@ for(double P_CLUST = 0;P_CLUST <=0.9;P_CLUST+=0.1){
 		for(vector<int>::const_iterator itr1 = CtgIdInCluster[i].begin(); itr1!=CtgIdInCluster[i].end();++itr1)
 			for(map<pair<int,int>,double>::const_iterator itr = taxid_score[*itr1].begin();itr!=taxid_score[*itr1].end();++itr)
 				ClustTaxidScore[itr->first] += itr->second;
-		double maxScore = 0;int maxSid = -1;int maxTid=-1;
-		for(map<pair<int,int>,double>::const_iterator itr = ClustTaxidScore.begin();itr!=ClustTaxidScore.end();++itr){
-			if(itr->second > maxScore){
-				maxScore = itr->second;
-				maxSid = itr->first.first;
-				maxTid = itr->first.second;
-			}
-		}
+		double maxScore = 0;
+		for(map<pair<int,int>,double>::const_iterator itr = ClustTaxidScore.begin();itr!=ClustTaxidScore.end();++itr)
+			maxScore = max(maxScore,itr->second);
 		set<int>cand_taxo;
 		for(map<pair<int,int>,double>::const_iterator itr = ClustTaxidScore.begin();itr!=ClustTaxidScore.end();++itr)
 			if(itr->second >= maxScore*(1.0-P_CLUST))
@@ -342,17 +307,14 @@ for(double P_CLUST = 0;P_CLUST <=0.9;P_CLUST+=0.1){
 		//////////////////////////////////////
 		//use lamda to decide taxon level.
 		double candScore = maxScore/ClustLength[i];
-		if(TaxonLamda.find(maxSid)==TaxonLamda.end())
-			cerr << "Sid not found." << maxSid << endl;
-		else{
-			for(int k=level;k<NL-1;++k){
-				if(candScore >= TaxonLamda[maxSid][k])
+		for(int k=level;k<NL-1;++k){
+			if(TaxonLamda.find(taxon)!=TaxonLamda.end()){
+		//		if(candScore > TaxonLamda[taxon])
+				if(candScore >= 0)
 					break;
 				else{
 					taxon = V[0][L8[k+1]];
 					level = k+1;
-			//		taxon = V[0][L8[k]];
-			//		level = k;
 				}
 			}
 		}
@@ -360,24 +322,6 @@ for(double P_CLUST = 0;P_CLUST <=0.9;P_CLUST+=0.1){
 		TaxoOfClust[i].taxon = taxon;
 		TaxoOfClust[i].level = level;
 //		cout << i << "\tcluster taxon:\t" << taxon << '\t' << level << endl;
-		if(INTEST){
-			cout << "cluster: " << i <<'\t'<<ClustLength[i] <<'\t' << maxScore <<'\t'<<maxSid<<'\t'<<maxTid << endl;
-			vector<int> maxTaxon = NodesDmp.getTaxo(maxTid);
-			for(int j=0;j<NL;++j)
-				cout << maxTaxon[L8[j]]<<'\t';
-			cout << endl;
-			vector<int> predTaxon = NodesDmp.getTaxo(taxon);
-			for(int j=0;j<NL;++j)
-				cout << predTaxon[L8[j]]<<'\t';
-			cout << endl;
-			/*
-			for(vector<int>::const_iterator itr1 = CtgIdInCluster[i].begin(); itr1!=CtgIdInCluster[i].end();++itr1){
-				vector<int> spTaxon  = NodesDmp.getTaxo(spInfoOfCtgs[*itr1].spTaxId);
-				for(int j=0;j<NL;++j)
-					cout << spTaxon[L8[j]]<<'\t';
-				cout<<"taxon: " << *itr1 << '\t' << spInfoOfCtgs[*itr1].refLevel << '\t' << spInfoOfCtgs[*itr1].spFId << '\t' << spInfoOfCtgs[*itr1].spTaxId << '\t' << ClustLength[*itr1]<<endl;
-			}*/
-		}
 	}
 	{
 		cout << "P_CLUST = " << P_CLUST << endl;
@@ -421,17 +365,13 @@ for(double P_CLUST = 0;P_CLUST <=0.9;P_CLUST+=0.1){
 			}
 			cout << endl<< endl;
 
-			int lower = 0,high=0,tinc=0,corr=Evaluate[l][l][l];
+			int lower = 0,high=0,corr=Evaluate[l][l][l];
 			for(int i=0;i<l;++i)
 				for(int j=0;j<=l;++j)
 					lower += Evaluate[l][i][j];
 			for(int i=l+1;i<NL;++i)
 				high += Evaluate[l][i][i];
-			for(int i=0;i<NL;++i)
-				for(int j=0;j<NL;++j)
-					tinc += Evaluate[l][i][j];
-			tinc -= (lower+high+corr);
-			cerr << tinc << '\t' << lower << '\t' << high << '\t' << corr << '\t' <<sum << endl;
+			cerr << lower << '\t' << high << '\t' << corr << '\t' <<sum << endl;
 		}
 	}
 }

@@ -158,6 +158,20 @@ public:
 		Node_Score[TreeNodes[leaf].levelId][leaf] += score;
 	}
 
+	vector<int> getTaxo(int leaf)const
+	{
+		int vsize = Id2LevelName.size();
+		vector<int> ans(vsize,0);
+		if(leaf<0 || leaf>=MAXTAXID)
+			return ans;
+		while(leaf != TreeNodes[leaf].father)
+		{
+			ans[TreeNodes[leaf].levelId] = leaf;
+			leaf = TreeNodes[leaf].father;
+		}
+		return ans;
+	}
+
 	int getMaxTaxId()const
 	{ 
 		return MaxTaxId;

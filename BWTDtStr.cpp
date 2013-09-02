@@ -4,10 +4,6 @@
 #include <omp.h>
 using namespace std;
 
-void BWTDtStr::iniStatic()
-{
-}
-
 inline void set_ith_bit_1(unsigned short* arr,unsigned i)
 {
 	arr[i/16] |= (1<<(i%16));
@@ -20,7 +16,9 @@ BWTDtStr::BWTDtStr()
 		AppearL1[i] = NULL;
 		AppearL2[i] = NULL;
 	}
-	Taxid_of_SA = NULL;
+	Sid_of_SA = NULL;
+	NSeq = 0;
+	Id2Taxon = NULL;
 	for(unsigned i=0;i<(1U<<16);++i)
 	{ 
 		int oneN = 0;
@@ -29,9 +27,14 @@ BWTDtStr::BWTDtStr()
 	}
 }
 
-void BWTDtStr::preprocess(char* bwt_in_DESIGN_format, int* Taxid_of_SA_)
+void BWTDtStr::preprocess(char* bwt_in_DESIGN_format, int* Sid_of_SA_, long long nuc_length, int* Id2Taxon_, int NSeq_)
 {
-	Taxid_of_SA = Taxid_of_SA_;
+	Sid_of_SA = new int[nuc_length];
+	memcpy(Sid_of_SA, Sid_of_SA_, nuc_length*4);
+	NSeq = NSeq_;
+	Id2Taxon = new int[NSeq];
+	memcpy(Id2Taxon, Id2Taxon_, NSeq*4);
+
 	char* bwt = bwt_in_DESIGN_format;
 	////////get bwt length
 	length = strlen(bwt);
@@ -221,7 +224,10 @@ pair<long long, long long> BWTDtStr::naiveSearchBeginWith(const vector<int>& que
 }
 BWTDtStr::~BWTDtStr()
 {
-/*	delete[] Taxid_of_SA;
+/*	if(Sid_of_SA)
+		delete[] Sid_of_SA;
+	if(Id2Taxon)
+		delete[] Id2Taxon;
 	for(int i=0;i<4;++i)
 	{
 		if(bits[i])
@@ -234,9 +240,12 @@ BWTDtStr::~BWTDtStr()
 }
 void BWTDtStr::clear()
 {
-	if(Taxid_of_SA)
-		delete[] Taxid_of_SA;
-	Taxid_of_SA = NULL;
+	if(Sid_of_SA)
+		delete[] Sid_of_SA;
+	Sid_of_SA = NULL;
+	if(Id2Taxon)
+		delete[] Id2Taxon;
+	Id2Taxon = NULL;
 	for(int i=0;i<4;++i)
 	{
 		if(bits[i])
@@ -245,7 +254,6 @@ void BWTDtStr::clear()
 			delete[] AppearL1[i];
 		if(AppearL2[i])
 			delete[] AppearL2[i];
-
 		bits[i] = NULL;
 		AppearL1[i] = NULL;
 		AppearL2[i] = NULL;

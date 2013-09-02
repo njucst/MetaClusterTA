@@ -20,7 +20,6 @@
 class BWTGenerator
 {
 public:
-	long long calBWT(char* input);
 	void calBWTfromCompleGenome(std::string FoldPath,std::string gi_taxid_nucl_path, std::string outfile);
 
 	unsigned* getSA() const {return SA;}
@@ -68,6 +67,7 @@ private:
 
 	char* bwt; 
 	std::vector<std::pair<int,int> >BinarySearchTable;
+	std::vector<int>Sa2Taxon;
 
 	bool c0(unsigned *r,long long a,long long b);
 	bool c12(long long k,unsigned *r,long long a,long long b);
@@ -79,6 +79,6 @@ private:
 
 	int binary_search_taxid(int sa_idx);
 	void outputSA_BWT_Taxid(std::string outfile, long long bwtstridx);
-
+	long long calBWT(char* input);
 };
 #endif
